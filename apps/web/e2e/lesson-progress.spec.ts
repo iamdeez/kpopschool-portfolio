@@ -24,7 +24,9 @@ test("demo visitor buys a course, completes a lesson, and sees progress reflecte
   await page.getByRole("link", { name: "Watch lessons" }).click();
   await expect(page).toHaveURL(/\/curriculum\/.+\/lessons/);
 
-  await page.getByRole("button", { name: /^1\. /, exact: false }).click();
+  // Lesson 1 has a v1.2.0 quiz (seed-database.ts) and shows quiz UI instead
+  // of the plain checkbox — use lesson 2 to exercise the manual-complete path.
+  await page.getByRole("button", { name: /^2\. /, exact: false }).click();
   // Chakra's Checkbox visually hides the native input and renders a custom
   // control span on top of it, which intercepts pointer events aimed at the
   // input directly — click the associated label text instead of .check().

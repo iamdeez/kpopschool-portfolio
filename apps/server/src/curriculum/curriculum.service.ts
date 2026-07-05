@@ -17,16 +17,27 @@ export class CurriculumService extends FirestoreCrudService<Curriculum> {
     }
   }
 
-  // ValidationPipe's `transform: true` turns `lessons` into an array of
-  // LessonDto class instances (custom prototype), which the Firestore SDK
-  // refuses to serialize. Spreading each entry back into a plain object
-  // strips the prototype without changing its fields.
+  // ValidationPipe's `transform: true` turns `lessons` (and its nested
+  // `quiz` entries) into class instances (custom prototype), which the
+  // Firestore SDK refuses to serialize. Spreading each entry back into a
+  // plain object strips the prototype without changing its fields — done at
+  // both nesting levels, since spreading `lesson` alone leaves the `quiz`
+  // array's elements as QuizQuestionDto instances.
   private toPlainLessons<TInput extends object>(data: TInput): TInput {
     const lessons = (data as { lessons?: unknown }).lessons;
     if (!Array.isArray(lessons)) {
       return data;
     }
-    return { ...data, lessons: lessons.map((lesson) => ({ ...lesson })) };
+    return {
+      ...data,
+      lessons: lessons.map((lesson) => {
+        const quiz = (lesson as { quiz?: unknown }).quiz;
+        return {
+          ...lesson,
+          quiz: Array.isArray(quiz) ? quiz.map((question) => ({ ...question })) : quiz,
+        };
+      }),
+    };
   }
 
   async create<TInput extends object>(data: TInput): Promise<Curriculum> {

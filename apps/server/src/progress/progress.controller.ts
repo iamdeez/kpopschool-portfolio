@@ -28,4 +28,14 @@ export class ProgressController {
   ) {
     return this.progressService.setLessonComplete(user.uid, curriculumId, lessonId, completed !== false);
   }
+
+  @Post(":curriculumId/lessons/:lessonId/quiz-submit")
+  submitQuiz(
+    @Param("curriculumId") curriculumId: string,
+    @Param("lessonId") lessonId: string,
+    @Body("answers") answers: number[],
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.progressService.submitQuiz(user.uid, curriculumId, lessonId, answers ?? []);
+  }
 }

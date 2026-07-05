@@ -19,6 +19,7 @@ const Payment = lazy(() => import("./pages/Payment").then((m) => ({ default: m.P
 const PaymentResult = lazy(() => import("./pages/PaymentResult").then((m) => ({ default: m.PaymentResult })));
 const Classroom = lazy(() => import("./pages/Classroom").then((m) => ({ default: m.Classroom })));
 const LessonPlayer = lazy(() => import("./pages/LessonPlayer").then((m) => ({ default: m.LessonPlayer })));
+const CertificatePage = lazy(() => import("./pages/CertificatePage").then((m) => ({ default: m.CertificatePage })));
 const Login = lazy(() => import("./pages/account/Login").then((m) => ({ default: m.Login })));
 const SignUp = lazy(() => import("./pages/account/SignUp").then((m) => ({ default: m.SignUp })));
 const SignOut = lazy(() => import("./pages/account/SignOut").then((m) => ({ default: m.SignOut })));
@@ -65,6 +66,14 @@ export function App() {
                   element={
                     <RequireAuth>
                       <LessonPlayer />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/curriculum/:curriculumId/certificate"
+                  element={
+                    <RequireAuth>
+                      <CertificatePage />
                     </RequireAuth>
                   }
                 />

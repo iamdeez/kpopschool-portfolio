@@ -6,6 +6,7 @@ import { AdminTeachers } from "./AdminTeachers";
 import { AdminCurriculums } from "./AdminCurriculums";
 import { AdminEvents } from "./AdminEvents";
 import { AdminFaqs } from "./AdminFaqs";
+import { AdminReports } from "./AdminReports";
 import { signOut } from "../../firebase/auth";
 import { popmag, popmint, brandLightGray } from "../../theme";
 import kpopLogo from "../../assets/Logo/KpopLogo.png";
@@ -13,12 +14,13 @@ import kpopLogo from "../../assets/Logo/KpopLogo.png";
 // Mirrors the original AD/Dashboard/Sidebar.js (fixed 240px, brandLightGray
 // bg, popmag right border + active-tab accent) and DashboardTopbar.js
 // (breadcrumb + log out) — ported as local state instead of nested routes
-// since the four panels don't need independently linkable URLs.
+// since the five panels don't need independently linkable URLs.
 const SECTIONS = [
   { key: "teachers", label: "Teachers", Panel: AdminTeachers },
   { key: "curriculum", label: "Curriculum", Panel: AdminCurriculums },
   { key: "events", label: "Events", Panel: AdminEvents },
   { key: "faq", label: "FAQ", Panel: AdminFaqs },
+  { key: "reports", label: "Reports", Panel: AdminReports },
 ] as const;
 
 const SIDEBAR_WIDTH = "240px";

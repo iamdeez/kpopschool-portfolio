@@ -8,3 +8,5 @@ export * from "./user";
 export * from "./payment";
 export * from "./integration";
 export * from "./progress";
+export * from "./reporting";
+export * from "./comment";

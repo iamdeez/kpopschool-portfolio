@@ -1,9 +1,9 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import type { Firestore } from "firebase-admin/firestore";
-import type { Curriculum, CurriculumProgress } from "@kpopschool/shared-types";
+import type { Curriculum, CurriculumProgress, QuizResult } from "@kpopschool/shared-types";
 import { FIRESTORE } from "../common/firebase-admin.module";
 import { CurriculumService } from "../curriculum/curriculum.service";
-import { calculateProgressPercent } from "./calculate-progress";
+import { calculateProgressPercent, calculateQuizScore } from "./calculate-progress";
 
 const PROGRESS_COLLECTION = "PROGRESS";
 
@@ -49,30 +49,60 @@ export class ProgressService {
     }
   }
 
-  private async readCompletedLessonIds(uid: string, curriculumId: string): Promise<string[]> {
+  private async readProgressDoc(
+    uid: string,
+    curriculumId: string,
+  ): Promise<{ completedLessonIds: string[]; updatedAt: string | null }> {
     const doc = await this.firestore.collection(PROGRESS_COLLECTION).doc(this.progressDocId(uid, curriculumId)).get();
-    return (doc.data()?.completedLessonIds as string[] | undefined) ?? [];
+    const data = doc.data();
+    return {
+      completedLessonIds: (data?.completedLessonIds as string[] | undefined) ?? [],
+      updatedAt: (data?.updatedAt as string | undefined) ?? null,
+    };
   }
 
-  private toCurriculumProgress(curriculum: Curriculum, completedLessonIds: string[]): CurriculumProgress {
+  // v1.2.0 ASM-003: completedAt is derived from the progress doc's last
+  // write, not a separately-stored "first completed at" — so it only ever
+  // reflects the certificate being currently earned (percent === 100), not
+  // history from before an un-check dropped it back below 100.
+  private toCurriculumProgress(
+    curriculum: Curriculum,
+    completedLessonIds: string[],
+    updatedAt: string | null,
+  ): CurriculumProgress {
     const totalLessons = curriculum.lessons?.length ?? 0;
     const validCompleted = completedLessonIds.filter((lessonId) =>
       curriculum.lessons?.some((lesson) => lesson.id === lessonId),
     );
+    const percent = calculateProgressPercent(totalLessons, validCompleted.length);
     return {
       curriculumId: curriculum.id,
       curriculumTitle: curriculum.title,
       completedLessonIds: validCompleted,
       totalLessons,
-      percent: calculateProgressPercent(totalLessons, validCompleted.length),
+      percent,
+      completedAt: percent === 100 ? updatedAt : null,
     };
+  }
+
+  private async writeCompletedLessonIds(
+    uid: string,
+    curriculumId: string,
+    completedLessonIds: string[],
+  ): Promise<string> {
+    const updatedAt = new Date().toISOString();
+    await this.firestore
+      .collection(PROGRESS_COLLECTION)
+      .doc(this.progressDocId(uid, curriculumId))
+      .set({ uid, curriculumId, completedLessonIds, updatedAt }, { merge: true });
+    return updatedAt;
   }
 
   async getProgress(uid: string, curriculumId: string): Promise<CurriculumProgress> {
     await this.assertPurchased(uid, curriculumId);
     const curriculum = await this.curriculumService.get(curriculumId);
-    const completedLessonIds = await this.readCompletedLessonIds(uid, curriculumId);
-    return this.toCurriculumProgress(curriculum, completedLessonIds);
+    const { completedLessonIds, updatedAt } = await this.readProgressDoc(uid, curriculumId);
+    return this.toCurriculumProgress(curriculum, completedLessonIds, updatedAt);
   }
 
   async setLessonComplete(
@@ -87,20 +117,45 @@ export class ProgressService {
       throw new NotFoundException(`Lesson ${lessonId} not found on curriculum ${curriculumId}`);
     }
 
-    const current = new Set(await this.readCompletedLessonIds(uid, curriculumId));
+    const { completedLessonIds: existing } = await this.readProgressDoc(uid, curriculumId);
+    const current = new Set(existing);
     if (completed) {
       current.add(lessonId);
     } else {
       current.delete(lessonId);
     }
     const completedLessonIds = Array.from(current);
+    const updatedAt = await this.writeCompletedLessonIds(uid, curriculumId, completedLessonIds);
 
-    await this.firestore
-      .collection(PROGRESS_COLLECTION)
-      .doc(this.progressDocId(uid, curriculumId))
-      .set({ uid, curriculumId, completedLessonIds, updatedAt: new Date().toISOString() }, { merge: true });
+    return this.toCurriculumProgress(curriculum, completedLessonIds, updatedAt);
+  }
 
-    return this.toCurriculumProgress(curriculum, completedLessonIds);
+  // FR-003/FR-004: grades against the lesson's quiz and, on a passing score,
+  // reuses the same completion bookkeeping setLessonComplete uses.
+  async submitQuiz(uid: string, curriculumId: string, lessonId: string, answers: number[]): Promise<QuizResult> {
+    await this.assertPurchased(uid, curriculumId);
+    const curriculum = await this.curriculumService.get(curriculumId);
+    const lesson = curriculum.lessons?.find((candidate) => candidate.id === lessonId);
+    if (!lesson) {
+      throw new NotFoundException(`Lesson ${lessonId} not found on curriculum ${curriculumId}`);
+    }
+    const quiz = lesson.quiz ?? [];
+    if (quiz.length === 0) {
+      throw new NotFoundException(`Lesson ${lessonId} has no quiz`);
+    }
+
+    const correctCount = quiz.filter((question, index) => answers[index] === question.correctOptionIndex).length;
+    const { score, passed } = calculateQuizScore(quiz.length, correctCount);
+
+    const { completedLessonIds: existing } = await this.readProgressDoc(uid, curriculumId);
+    const current = new Set(existing);
+    if (passed) {
+      current.add(lessonId);
+    }
+    const completedLessonIds = Array.from(current);
+    const updatedAt = await this.writeCompletedLessonIds(uid, curriculumId, completedLessonIds);
+
+    return { score, passed, progress: this.toCurriculumProgress(curriculum, completedLessonIds, updatedAt) };
   }
 
   async listForUser(uid: string): Promise<CurriculumProgress[]> {
@@ -122,8 +177,8 @@ export class ProgressService {
     const results: CurriculumProgress[] = [];
     for (const curriculumId of curriculumIds) {
       const curriculum = await this.curriculumService.get(curriculumId);
-      const completedLessonIds = await this.readCompletedLessonIds(uid, curriculumId);
-      results.push(this.toCurriculumProgress(curriculum, completedLessonIds));
+      const { completedLessonIds, updatedAt } = await this.readProgressDoc(uid, curriculumId);
+      results.push(this.toCurriculumProgress(curriculum, completedLessonIds, updatedAt));
     }
     return results;
   }

@@ -15,7 +15,7 @@ import {
 import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { useMyInquiries, useMyPayments, useMyProgress, useUserProfile } from "../api/hooks";
-import { popmint, brandGray } from "../theme";
+import { popmint, popmag, brandGray } from "../theme";
 
 export function MyPage() {
   const { firebaseUser } = useAuth();
@@ -85,9 +85,16 @@ export function MyPage() {
               <Stack spacing={4}>
                 {progress.data?.map((item) => (
                   <Box key={item.curriculumId} p={4} borderWidth={1} borderRadius="xl">
-                    <ChakraLink as={RouterLink} to={`/curriculum/${item.curriculumId}/lessons`} fontWeight="bold" color={popmint}>
-                      {item.curriculumTitle}
-                    </ChakraLink>
+                    <Stack direction="row" justify="space-between" align="center">
+                      <ChakraLink as={RouterLink} to={`/curriculum/${item.curriculumId}/lessons`} fontWeight="bold" color={popmint}>
+                        {item.curriculumTitle}
+                      </ChakraLink>
+                      {item.percent === 100 && (
+                        <ChakraLink as={RouterLink} to={`/curriculum/${item.curriculumId}/certificate`} color={popmag} fontWeight="bold">
+                          🎓 Certificate
+                        </ChakraLink>
+                      )}
+                    </Stack>
                     <ProgressBar value={item.percent} colorScheme="teal" borderRadius="full" mt={2} mb={1} />
                     <Text fontSize="sm" color="gray.500">
                       {item.completedLessonIds.length}/{item.totalLessons} lessons completed ({item.percent}%)

@@ -1,9 +1,17 @@
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctOptionIndex: number;
+}
+
 export interface Lesson {
   id: string;
   title: string;
   order: number;
   videoUrl: string;
   durationMinutes: number;
+  quiz?: QuizQuestion[];
 }
 
 export interface Curriculum {

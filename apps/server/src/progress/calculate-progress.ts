@@ -5,3 +5,9 @@ export function calculateProgressPercent(totalLessons: number, completedCount: n
   }
   return Math.round((completedCount / totalLessons) * 100);
 }
+
+/** v1.2.0 FR-003: a quiz only "passes" on a perfect score — ASM-002. */
+export function calculateQuizScore(totalQuestions: number, correctCount: number): { score: number; passed: boolean } {
+  const score = calculateProgressPercent(totalQuestions, correctCount);
+  return { score, passed: totalQuestions > 0 && score === 100 };
+}

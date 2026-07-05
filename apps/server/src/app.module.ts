@@ -14,6 +14,8 @@ import { HomeModule } from "./home/home.module";
 import { PaymentModule } from "./payment/payment.module";
 import { VideoClassModule } from "./video-class/video-class.module";
 import { ProgressModule } from "./progress/progress.module";
+import { ReportingModule } from "./reporting/reporting.module";
+import { CommentModule } from "./comment/comment.module";
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { ProgressModule } from "./progress/progress.module";
     PaymentModule,
     VideoClassModule,
     ProgressModule,
+    ReportingModule,
+    CommentModule,
   ],
 })
 export class AppModule {}

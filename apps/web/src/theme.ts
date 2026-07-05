@@ -27,6 +27,12 @@ export const theme = extendTheme({
       "button:focus, input:focus": {
         outline: "none",
       },
+      // v1.2.0 FR-007: certificate page's print button hides itself when printed.
+      "@media print": {
+        ".no-print": {
+          display: "none",
+        },
+      },
     },
   },
 });

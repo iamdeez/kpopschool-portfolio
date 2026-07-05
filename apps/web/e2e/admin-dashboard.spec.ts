@@ -29,3 +29,17 @@ test("admin can create, list, and delete a teacher", async ({ page }) => {
     .click();
   await expect(page.getByText("E2E Test Teacher")).not.toBeVisible();
 });
+
+// v1.2.0 SC-003: admin sees revenue/student/teacher/curriculum summary cards and a per-curriculum table.
+test("admin sees the reports tab with summary cards and a curriculum table", async ({ page }) => {
+  await page.goto("/admin/login");
+  await page.getByLabel("Email").fill(process.env.E2E_ADMIN_EMAIL ?? "");
+  await page.getByLabel("Password").fill(process.env.E2E_ADMIN_PASSWORD ?? "");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+
+  await page.getByRole("button", { name: "Reports" }).click();
+  await expect(page.getByText("Total revenue")).toBeVisible();
+  await expect(page.getByText("Students")).toBeVisible();
+  await expect(page.getByRole("columnheader", { name: "Curriculum" })).toBeVisible();
+});

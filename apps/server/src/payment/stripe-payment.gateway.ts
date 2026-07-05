@@ -119,13 +119,11 @@ export class StripePaymentGateway implements PaymentGateway {
     return snapshot.docs.map((doc) => doc.data() as PaymentRecord);
   }
 
+  // v1.2.0 bugfix — see the identical comment in mock-payment.gateway.ts:
+  // `customers.get()` never lists documents that only exist as
+  // subcollection containers, so a collectionGroup query is required.
   async listAllPayments(): Promise<PaymentRecord[]> {
-    const customers = await this.firestore.collection(CUSTOMERS_COLLECTION).get();
-    const results: PaymentRecord[] = [];
-    for (const customer of customers.docs) {
-      const payments = await customer.ref.collection("payments").get();
-      payments.forEach((doc) => results.push(doc.data() as PaymentRecord));
-    }
-    return results;
+    const snapshot = await this.firestore.collectionGroup("payments").get();
+    return snapshot.docs.map((doc) => doc.data() as PaymentRecord);
   }
 }

@@ -77,13 +77,17 @@ export class MockPaymentGateway implements PaymentGateway {
     return snapshot.docs.map((doc) => doc.data() as PaymentRecord);
   }
 
+  // v1.2.0 bugfix: `customers.get()` lists top-level documents, but writing
+  // to `customers/{uid}/payments/{id}` never creates a `customers/{uid}`
+  // document with actual fields — Firestore doesn't materialize "ghost"
+  // parent documents that exist only as subcollection containers, so they
+  // never show up in a collection listing. A collectionGroup query finds
+  // every `payments` subcollection regardless of whether its parent
+  // document was ever explicitly written (confirmed against the emulator's
+  // REST API: `customers.get()` returned zero docs while a `payments`
+  // collectionGroup query found every payment that had actually been made).
   async listAllPayments(): Promise<PaymentRecord[]> {
-    const customers = await this.firestore.collection(CUSTOMERS_COLLECTION).get();
-    const results: PaymentRecord[] = [];
-    for (const customer of customers.docs) {
-      const payments = await customer.ref.collection("payments").get();
-      payments.forEach((doc) => results.push(doc.data() as PaymentRecord));
-    }
-    return results;
+    const snapshot = await this.firestore.collectionGroup("payments").get();
+    return snapshot.docs.map((doc) => doc.data() as PaymentRecord);
   }
 }

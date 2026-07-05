@@ -13,6 +13,27 @@ function buildLessons(totalSessions: number): Lesson[] {
     order: i + 1,
     videoUrl: SAMPLE_LESSON_VIDEO_URL,
     durationMinutes: 15,
+    // v1.2.0 FR-001/ASM-001: every curriculum's first lesson ships with a
+    // sample quiz so the quiz→auto-complete→certificate flow is demoable
+    // without an admin manually adding one first.
+    ...(i === 0
+      ? {
+          quiz: [
+            {
+              id: randomUUID(),
+              question: "What should you warm up before a lesson?",
+              options: ["Your voice/body", "Your phone battery", "Your Wi-Fi router", "Nothing"],
+              correctOptionIndex: 0,
+            },
+            {
+              id: randomUUID(),
+              question: "How often should you practice between lessons?",
+              options: ["Never", "Only the night before", "A little, regularly", "Only when inspired"],
+              correctOptionIndex: 2,
+            },
+          ],
+        }
+      : {}),
   }));
 }
 

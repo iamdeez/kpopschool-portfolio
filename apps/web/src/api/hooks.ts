@@ -4,14 +4,18 @@ import type {
   ChargeResult,
   CreateCurriculumInput,
   CreateInquiryInput,
+  CreateLessonCommentInput,
   CreateReviewInput,
   Curriculum,
   CurriculumProgress,
   Faq,
   Inquiry,
   KSchoolEvent,
+  LessonComment,
   PaymentRecord,
   Product,
+  QuizResult,
+  ReportSummary,
   Review,
   Teacher,
   UpdateCurriculumInput,
@@ -144,8 +148,58 @@ export const useSetLessonComplete = () => {
   });
 };
 
+// --- Lesson quiz (v1.2.0) -----------------------------------------------------
+export const useSubmitLessonQuiz = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ curriculumId, lessonId, answers }: { curriculumId: string; lessonId: string; answers: number[] }) =>
+      api.post<QuizResult>(`/progress/${curriculumId}/lessons/${lessonId}/quiz-submit`, { answers }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["progress", variables.curriculumId] });
+      queryClient.invalidateQueries({ queryKey: ["progress", "me"] });
+    },
+  });
+};
+
 // --- Demo login (FR-010) -----------------------------------------------------
 export const useDemoLogin = () =>
   useMutation({
     mutationFn: () => api.public.post<{ token: string; uid: string }>("/demo/login"),
   });
+
+// --- Admin reporting (v1.2.0) -------------------------------------------------
+export const useReportSummary = () =>
+  useQuery({ queryKey: ["reports", "summary"], queryFn: () => api.get<ReportSummary>("/admin/reports/summary") });
+
+// --- Lesson discussion (v1.2.0) -----------------------------------------------
+export const useLessonComments = (curriculumId: string | undefined, lessonId: string | undefined) =>
+  useQuery({
+    queryKey: ["comments", curriculumId, lessonId],
+    queryFn: () => api.get<LessonComment[]>(`/comments/${curriculumId}/${lessonId}`),
+    enabled: !!curriculumId && !!lessonId,
+  });
+export const useCreateLessonComment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      curriculumId,
+      lessonId,
+      input,
+    }: {
+      curriculumId: string;
+      lessonId: string;
+      input: CreateLessonCommentInput;
+    }) => api.post<LessonComment>(`/comments/${curriculumId}/${lessonId}`, input),
+    onSuccess: (_data, variables) =>
+      queryClient.invalidateQueries({ queryKey: ["comments", variables.curriculumId, variables.lessonId] }),
+  });
+};
+export const useDeleteLessonComment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ curriculumId, lessonId, commentId }: { curriculumId: string; lessonId: string; commentId: string }) =>
+      api.delete(`/comments/${curriculumId}/${lessonId}/${commentId}`),
+    onSuccess: (_data, variables) =>
+      queryClient.invalidateQueries({ queryKey: ["comments", variables.curriculumId, variables.lessonId] }),
+  });
+};

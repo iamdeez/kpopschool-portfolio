@@ -1,15 +1,109 @@
 import { useState } from "react";
-import { Box, Button, HStack, Input, Select, Stack, Text, useToast } from "@chakra-ui/react";
+import { Box, Button, HStack, Input, Radio, RadioGroup, Select, Stack, Text, useToast } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Curriculum, Lesson } from "@kpopschool/shared-types";
+import type { Curriculum, Lesson, QuizQuestion } from "@kpopschool/shared-types";
 import { useCurriculums, useTeachers, useUpdateCurriculum } from "../../api/hooks";
 import { api } from "../../api/client";
-import { popmint, brandLightGray } from "../../theme";
+import { popmint, popmag, brandLightGray } from "../../theme";
 
 // crypto.randomUUID() requires a Secure Context (HTTPS/localhost) — avoided
 // here since this admin UI may be viewed over plain HTTP on a deployed demo.
-function generateLessonId(): string {
-  return `lesson-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+function generateId(prefix: string): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function QuizManager({
+  lessons,
+  lesson,
+  updateCurriculum,
+}: {
+  lessons: Lesson[];
+  lesson: Lesson;
+  updateCurriculum: ReturnType<typeof useUpdateCurriculum>;
+}) {
+  const quiz = lesson.quiz ?? [];
+  const [form, setForm] = useState({ question: "", options: ["", "", "", ""], correctOptionIndex: 0 });
+
+  function saveLessonQuiz(nextQuiz: QuizQuestion[]) {
+    const nextLessons = lessons.map((candidate) => (candidate.id === lesson.id ? { ...candidate, quiz: nextQuiz } : candidate));
+    updateCurriculum.mutate({ lessons: nextLessons });
+  }
+
+  function addQuestion() {
+    if (!form.question || form.options.some((option) => !option)) {
+      return;
+    }
+    const newQuestion: QuizQuestion = {
+      id: generateId("quiz"),
+      question: form.question,
+      options: form.options,
+      correctOptionIndex: form.correctOptionIndex,
+    };
+    saveLessonQuiz([...quiz, newQuestion]);
+    setForm({ question: "", options: ["", "", "", ""], correctOptionIndex: 0 });
+  }
+
+  function removeQuestion(questionId: string) {
+    saveLessonQuiz(quiz.filter((question) => question.id !== questionId));
+  }
+
+  return (
+    <Box mt={2} pl={4} borderLeft="2px solid" borderColor={brandLightGray}>
+      <Text fontSize="xs" fontWeight="600" color={popmag} mb={1}>
+        Quiz
+      </Text>
+      <Stack spacing={1} mb={2}>
+        {quiz.map((question) => (
+          <HStack key={question.id} justify="space-between" align="start">
+            <Text fontSize="xs">
+              {question.question} — correct: {question.options[question.correctOptionIndex]}
+            </Text>
+            <Button size="xs" variant="ghost" colorScheme="red" onClick={() => removeQuestion(question.id)}>
+              Remove
+            </Button>
+          </HStack>
+        ))}
+        {quiz.length === 0 && (
+          <Text fontSize="xs" color="gray.400">
+            No quiz questions yet.
+          </Text>
+        )}
+      </Stack>
+      <Stack spacing={1}>
+        <Input
+          size="xs"
+          placeholder="Question"
+          value={form.question}
+          onChange={(e) => setForm({ ...form, question: e.target.value })}
+        />
+        <RadioGroup
+          value={String(form.correctOptionIndex)}
+          onChange={(value) => setForm({ ...form, correctOptionIndex: Number(value) })}
+        >
+          <Stack spacing={1}>
+            {form.options.map((option, index) => (
+              <HStack key={index}>
+                <Radio size="sm" value={String(index)} />
+                <Input
+                  size="xs"
+                  placeholder={`Option ${index + 1}`}
+                  value={option}
+                  onChange={(e) => {
+                    const nextOptions = [...form.options];
+                    nextOptions[index] = e.target.value;
+                    setForm({ ...form, options: nextOptions });
+                  }}
+                />
+              </HStack>
+            ))}
+          </Stack>
+        </RadioGroup>
+        <Button size="xs" alignSelf="flex-start" isLoading={updateCurriculum.isPending} onClick={addQuestion}>
+          Add question (select the radio for the correct option)
+        </Button>
+      </Stack>
+    </Box>
+  );
 }
 
 function LessonManager({ curriculum }: { curriculum: Curriculum }) {
@@ -22,7 +116,7 @@ function LessonManager({ curriculum }: { curriculum: Curriculum }) {
       return;
     }
     const newLesson: Lesson = {
-      id: generateLessonId(),
+      id: generateId("lesson"),
       title: form.title,
       order: lessons.length + 1,
       videoUrl: form.videoUrl,
@@ -41,16 +135,19 @@ function LessonManager({ curriculum }: { curriculum: Curriculum }) {
       <Text fontSize="sm" fontWeight="600" color={popmint} mb={2}>
         Lessons
       </Text>
-      <Stack spacing={1} mb={2}>
+      <Stack spacing={2} mb={2}>
         {lessons.map((lesson) => (
-          <HStack key={lesson.id} justify="space-between">
-            <Text fontSize="sm">
-              {lesson.order}. {lesson.title} ({lesson.durationMinutes}m)
-            </Text>
-            <Button size="xs" variant="ghost" colorScheme="red" onClick={() => removeLesson(lesson.id)}>
-              Remove
-            </Button>
-          </HStack>
+          <Box key={lesson.id}>
+            <HStack justify="space-between">
+              <Text fontSize="sm">
+                {lesson.order}. {lesson.title} ({lesson.durationMinutes}m)
+              </Text>
+              <Button size="xs" variant="ghost" colorScheme="red" onClick={() => removeLesson(lesson.id)}>
+                Remove
+              </Button>
+            </HStack>
+            <QuizManager lessons={lessons} lesson={lesson} updateCurriculum={updateCurriculum} />
+          </Box>
         ))}
         {lessons.length === 0 && (
           <Text fontSize="sm" color="gray.400">

@@ -78,4 +78,20 @@ export class FakeFirestore {
       },
     };
   }
+
+  // Mirrors real Firestore's collectionGroup: finds every subcollection
+  // named `subName` regardless of which parent document it hangs off —
+  // subcollections are stored under flat keys like "customers/{uid}/payments".
+  collectionGroup(subName: string) {
+    const store = this.store;
+    return {
+      async get() {
+        const matchingKeys = Array.from(store.keys()).filter((key) => key === subName || key.endsWith(`/${subName}`));
+        const docs = matchingKeys.flatMap((key) =>
+          Array.from(store.get(key)!.entries()).map(([id, data]) => ({ id, data: () => data })),
+        );
+        return { empty: docs.length === 0, docs };
+      },
+    };
+  }
 }
