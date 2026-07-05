@@ -44,13 +44,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Firestore emulator needs a JVM. GitHub's ubuntu-latest image ships
-      # one already, but pin a version explicitly rather than depend on
-      # whatever happens to be preinstalled.
+      # Firestore emulator needs a JVM, and firebase-tools@15 refuses to run
+      # on anything older than JDK 21 (confirmed via an actual CI run: 17
+      # fails with "firebase-tools no longer supports Java version before 21").
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
 
       # No `version:` here — pnpm/action-setup reads it from package.json's
       # "packageManager" field, and passing both makes recent versions of
