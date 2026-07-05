@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+.turbo/
+coverage/
+
+.env
+.env.local
+!.env.example
+
+*.log
+.DS_Store
+
+# service account / credential files must never be committed
+*serviceAccountKey*.json
+*firebase-adminsdk*.json

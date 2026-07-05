@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Local emulator only — see apps/server/.env.example for the note that
+    // production Firestore rules should be tightened before any real deploy.
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

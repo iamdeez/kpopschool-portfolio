@@ -1,0 +1,27 @@
+# Git metadata
+.git/
+.gitignore
+
+# Docs (not needed inside the image)
+docs/
+
+# Node
+**/node_modules/
+**/dist/
+**/build/
+**/.turbo/
+**/coverage/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# E2E artifacts
+**/playwright-report/
+**/test-results/
