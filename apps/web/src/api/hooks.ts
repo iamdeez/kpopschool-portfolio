@@ -6,6 +6,7 @@ import type {
   CreateInquiryInput,
   CreateReviewInput,
   Curriculum,
+  CurriculumProgress,
   Faq,
   Inquiry,
   KSchoolEvent,
@@ -13,6 +14,7 @@ import type {
   Product,
   Review,
   Teacher,
+  UpdateCurriculumInput,
   UpdateUserInput,
   User,
   VideoClassSession,
@@ -37,6 +39,13 @@ export const useCreateCurriculum = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateCurriculumInput) => api.post<Curriculum>("/curriculums", input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["curriculums"] }),
+  });
+};
+export const useUpdateCurriculum = (id: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateCurriculumInput) => api.patch<Curriculum>(`/curriculums/${id}`, input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["curriculums"] }),
   });
 };
@@ -112,6 +121,28 @@ export const useJoinVideoClass = () =>
   useMutation({
     mutationFn: (curriculumId: string) => api.post<VideoClassSession>("/video-class/join", { curriculumId }),
   });
+
+// --- Lesson progress (v1.1.0) ------------------------------------------------
+export const useCurriculumProgress = (curriculumId: string | undefined, options?: { enabled?: boolean }) =>
+  useQuery({
+    queryKey: ["progress", curriculumId],
+    queryFn: () => api.get<CurriculumProgress>(`/progress/${curriculumId}`),
+    enabled: !!curriculumId && (options?.enabled ?? true),
+    retry: false,
+  });
+export const useMyProgress = () =>
+  useQuery({ queryKey: ["progress", "me"], queryFn: () => api.get<CurriculumProgress[]>("/progress") });
+export const useSetLessonComplete = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ curriculumId, lessonId, completed }: { curriculumId: string; lessonId: string; completed: boolean }) =>
+      api.post<CurriculumProgress>(`/progress/${curriculumId}/lessons/${lessonId}/complete`, { completed }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["progress", variables.curriculumId] });
+      queryClient.invalidateQueries({ queryKey: ["progress", "me"] });
+    },
+  });
+};
 
 // --- Demo login (FR-010) -----------------------------------------------------
 export const useDemoLogin = () =>

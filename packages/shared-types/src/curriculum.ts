@@ -1,3 +1,11 @@
+export interface Lesson {
+  id: string;
+  title: string;
+  order: number;
+  videoUrl: string;
+  durationMinutes: number;
+}
+
 export interface Curriculum {
   id: string;
   title: string;
@@ -8,7 +16,7 @@ export interface Curriculum {
   format: string;
   month: number;
   totalSessions: number;
-  sessions: string[];
+  lessons: Lesson[];
   price: number;
   description: string;
   difficulty: string;

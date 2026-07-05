@@ -3,6 +3,7 @@ import { Box, Button, HStack, Input, Stack, Text, useToast } from "@chakra-ui/re
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEvents } from "../../api/hooks";
 import { api } from "../../api/client";
+import { popmint } from "../../theme";
 
 export function AdminEvents() {
   const events = useEvents();
@@ -40,7 +41,7 @@ export function AdminEvents() {
   return (
     <Stack spacing={6}>
       <Box>
-        <Text fontWeight="bold" mb={2}>Add event</Text>
+        <Text color={popmint} fontWeight="700" fontSize="lg" mb={3}>Add event</Text>
         <HStack>
           <Input placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <Input placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
@@ -56,9 +57,9 @@ export function AdminEvents() {
 
       <Stack spacing={2}>
         {events.data?.map((event) => (
-          <HStack key={event.id} justify="space-between" p={3} borderWidth={1} borderRadius="md">
+          <HStack key={event.id} justify="space-between" p={4} bg="white" borderRadius="lg" boxShadow="sm">
             <Text>{event.title} — {event.discountAmount}% off</Text>
-            <Button size="sm" colorScheme="red" onClick={() => deleteEvent.mutate(event.id)}>Delete</Button>
+            <Button size="sm" variant="outline" colorScheme="red" onClick={() => deleteEvent.mutate(event.id)}>Delete</Button>
           </HStack>
         ))}
       </Stack>

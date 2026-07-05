@@ -18,6 +18,7 @@ const MyPage = lazy(() => import("./pages/MyPage").then((m) => ({ default: m.MyP
 const Payment = lazy(() => import("./pages/Payment").then((m) => ({ default: m.Payment })));
 const PaymentResult = lazy(() => import("./pages/PaymentResult").then((m) => ({ default: m.PaymentResult })));
 const Classroom = lazy(() => import("./pages/Classroom").then((m) => ({ default: m.Classroom })));
+const LessonPlayer = lazy(() => import("./pages/LessonPlayer").then((m) => ({ default: m.LessonPlayer })));
 const Login = lazy(() => import("./pages/account/Login").then((m) => ({ default: m.Login })));
 const SignUp = lazy(() => import("./pages/account/SignUp").then((m) => ({ default: m.SignUp })));
 const SignOut = lazy(() => import("./pages/account/SignOut").then((m) => ({ default: m.SignOut })));
@@ -59,6 +60,14 @@ export function App() {
                 <Route path="/teachers/:id" element={<TeacherDetail />} />
                 <Route path="/curriculum" element={<CurriculumList />} />
                 <Route path="/curriculum/:id" element={<CurriculumDetail />} />
+                <Route
+                  path="/curriculum/:curriculumId/lessons"
+                  element={
+                    <RequireAuth>
+                      <LessonPlayer />
+                    </RequireAuth>
+                  }
+                />
                 <Route path="/community" element={<Community />} />
                 <Route path="/signin" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />

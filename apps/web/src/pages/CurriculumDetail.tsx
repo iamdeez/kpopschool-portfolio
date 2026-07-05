@@ -79,6 +79,16 @@ export function CurriculumDetail() {
               >
                 Join a live class
               </Button>
+              <Button
+                as={RouterLink}
+                to={firebaseUser ? `/curriculum/${curriculum.data.id}/lessons` : "/signin"}
+                variant="outline"
+                color={popmag}
+                borderColor={popmag}
+                size="lg"
+              >
+                Watch lessons
+              </Button>
             </Stack>
           </Stack>
         )}

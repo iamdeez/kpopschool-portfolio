@@ -17,13 +17,25 @@ export class CurriculumService extends FirestoreCrudService<Curriculum> {
     }
   }
 
+  // ValidationPipe's `transform: true` turns `lessons` into an array of
+  // LessonDto class instances (custom prototype), which the Firestore SDK
+  // refuses to serialize. Spreading each entry back into a plain object
+  // strips the prototype without changing its fields.
+  private toPlainLessons<TInput extends object>(data: TInput): TInput {
+    const lessons = (data as { lessons?: unknown }).lessons;
+    if (!Array.isArray(lessons)) {
+      return data;
+    }
+    return { ...data, lessons: lessons.map((lesson) => ({ ...lesson })) };
+  }
+
   async create<TInput extends object>(data: TInput): Promise<Curriculum> {
     const teacherId = (data as { teacherId?: unknown }).teacherId;
     if (typeof teacherId !== "string") {
       throw new BadRequestException("teacherId is required");
     }
     await this.assertTeacherExists(teacherId);
-    return super.create({ ...data, likes: 0, review: 0, student: 0, classes: [] });
+    return super.create({ ...this.toPlainLessons(data), likes: 0, review: 0, student: 0, classes: [] });
   }
 
   async update<TInput extends object>(id: string, data: TInput): Promise<Curriculum> {
@@ -31,7 +43,7 @@ export class CurriculumService extends FirestoreCrudService<Curriculum> {
     if (typeof teacherId === "string") {
       await this.assertTeacherExists(teacherId);
     }
-    return super.update(id, data);
+    return super.update(id, this.toPlainLessons(data));
   }
 
   async search(keyword: string): Promise<Curriculum[]> {

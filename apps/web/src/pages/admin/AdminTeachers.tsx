@@ -3,6 +3,7 @@ import { Box, Button, HStack, Input, Stack, Text, useToast } from "@chakra-ui/re
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTeachers } from "../../api/hooks";
 import { api } from "../../api/client";
+import { popmint } from "../../theme";
 
 export function AdminTeachers() {
   const teachers = useTeachers();
@@ -27,7 +28,7 @@ export function AdminTeachers() {
   return (
     <Stack spacing={6}>
       <Box>
-        <Text fontWeight="bold" mb={2}>Add teacher</Text>
+        <Text color={popmint} fontWeight="700" fontSize="lg" mb={3}>Add teacher</Text>
         <HStack>
           <Input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <Input placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
@@ -39,9 +40,9 @@ export function AdminTeachers() {
 
       <Stack spacing={2}>
         {teachers.data?.map((teacher) => (
-          <HStack key={teacher.id} justify="space-between" p={3} borderWidth={1} borderRadius="md">
+          <HStack key={teacher.id} justify="space-between" p={4} bg="white" borderRadius="lg" boxShadow="sm">
             <Text>{teacher.name} — {teacher.category}</Text>
-            <Button size="sm" colorScheme="red" onClick={() => deleteTeacher.mutate(teacher.id)}>Delete</Button>
+            <Button size="sm" variant="outline" colorScheme="red" onClick={() => deleteTeacher.mutate(teacher.id)}>Delete</Button>
           </HStack>
         ))}
       </Stack>

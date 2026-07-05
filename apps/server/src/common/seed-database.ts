@@ -1,4 +1,20 @@
 import type { Firestore } from "firebase-admin/firestore";
+import { randomUUID } from "node:crypto";
+import type { Lesson } from "@kpopschool/shared-types";
+
+// A public-domain sample clip (no real licensed course content) reused across
+// every seeded lesson — v1.1.0 FR-007/ASM-001.
+const SAMPLE_LESSON_VIDEO_URL = "https://www.w3schools.com/html/mov_bbb.mp4";
+
+function buildLessons(totalSessions: number): Lesson[] {
+  return Array.from({ length: totalSessions }, (_, i) => ({
+    id: randomUUID(),
+    title: `Lesson ${i + 1}`,
+    order: i + 1,
+    videoUrl: SAMPLE_LESSON_VIDEO_URL,
+    durationMinutes: 15,
+  }));
+}
 
 /**
  * FR-011/SC-011: populates every domain collection with enough representative
@@ -152,7 +168,7 @@ export async function seedDatabase(firestore: Firestore): Promise<{
         format: seed.format,
         month: 1,
         totalSessions: seed.totalSessions,
-        sessions: Array.from({ length: seed.totalSessions }, (_, i) => `Session ${i + 1}`),
+        lessons: buildLessons(seed.totalSessions),
         price: seed.price,
         description: seed.description,
         difficulty: seed.difficulty,

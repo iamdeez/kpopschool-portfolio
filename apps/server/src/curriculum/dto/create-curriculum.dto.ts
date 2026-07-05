@@ -1,4 +1,6 @@
-import { IsArray, IsNumber, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsArray, IsNumber, IsString, ValidateNested } from "class-validator";
+import { LessonDto } from "./lesson.dto";
 
 export class CreateCurriculumDto {
   @IsString() title!: string;
@@ -8,7 +10,10 @@ export class CreateCurriculumDto {
   @IsString() format!: string;
   @IsNumber() month!: number;
   @IsNumber() totalSessions!: number;
-  @IsArray() sessions!: string[];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => LessonDto)
+  lessons!: LessonDto[];
   @IsNumber() price!: number;
   @IsString() description!: string;
   @IsString() difficulty!: string;

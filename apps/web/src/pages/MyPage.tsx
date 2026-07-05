@@ -1,6 +1,20 @@
-import { Box, Container, Skeleton, Stack, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Container,
+  Link as ChakraLink,
+  Progress as ProgressBar,
+  Skeleton,
+  Stack,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Text,
+} from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import { useMyInquiries, useMyPayments, useUserProfile } from "../api/hooks";
+import { useMyInquiries, useMyPayments, useMyProgress, useUserProfile } from "../api/hooks";
 import { popmint, brandGray } from "../theme";
 
 export function MyPage() {
@@ -8,6 +22,7 @@ export function MyPage() {
   const profile = useUserProfile(firebaseUser?.uid);
   const payments = useMyPayments();
   const inquiries = useMyInquiries();
+  const progress = useMyProgress();
 
   return (
     <Container minW="container.xl" pb={16}>
@@ -27,6 +42,9 @@ export function MyPage() {
           </Tab>
           <Tab px={0} fontSize="xl" fontWeight="600" color={brandGray} _selected={{ color: popmint }}>
             My inquiries
+          </Tab>
+          <Tab px={0} fontSize="xl" fontWeight="600" color={brandGray} _selected={{ color: popmint }}>
+            My progress
           </Tab>
         </TabList>
         <TabPanels pt={6}>
@@ -59,6 +77,24 @@ export function MyPage() {
                   </Box>
                 ))}
                 {inquiries.data?.length === 0 && <Text color="gray.500">No inquiries yet.</Text>}
+              </Stack>
+            </Skeleton>
+          </TabPanel>
+          <TabPanel px={0}>
+            <Skeleton isLoaded={!progress.isLoading}>
+              <Stack spacing={4}>
+                {progress.data?.map((item) => (
+                  <Box key={item.curriculumId} p={4} borderWidth={1} borderRadius="xl">
+                    <ChakraLink as={RouterLink} to={`/curriculum/${item.curriculumId}/lessons`} fontWeight="bold" color={popmint}>
+                      {item.curriculumTitle}
+                    </ChakraLink>
+                    <ProgressBar value={item.percent} colorScheme="teal" borderRadius="full" mt={2} mb={1} />
+                    <Text fontSize="sm" color="gray.500">
+                      {item.completedLessonIds.length}/{item.totalLessons} lessons completed ({item.percent}%)
+                    </Text>
+                  </Box>
+                ))}
+                {progress.data?.length === 0 && <Text color="gray.500">No courses purchased yet.</Text>}
               </Stack>
             </Skeleton>
           </TabPanel>
