@@ -1,12 +1,15 @@
 # kpopschool — portfolio demo
 
 A from-scratch, modern-stack rewrite of a K-pop dance/vocal lesson booking
-platform (teachers, curriculums, bookings, payments, live classes, a
-community board, and an admin dashboard), built as a safe-to-demo portfolio
-piece. Full spec/plan/tasks live one level up (this repo is a sibling of the
-original `kpop_server`/`kpopschool`, under a shared `docs/` — see the
-[design doc's rationale](../docs/specs/v1.0.0/001-kpopschool-portfolio-renewal/plan.md)):
-[`../docs/specs/v1.0.0/001-kpopschool-portfolio-renewal/`](../docs/specs/v1.0.0/001-kpopschool-portfolio-renewal/spec.md).
+platform — teachers, curriculums, bookings, payments, live classes, video
+lessons with quizzes and certificates, per-lesson discussion, an admin
+dashboard with a reporting tab, built as a safe-to-demo portfolio piece.
+Full spec/plan/tasks live one level up (this repo is a sibling of the
+original `kpop_server`/`kpopschool`, under a shared `docs/`):
+
+- [`v1.0.0/001-kpopschool-portfolio-renewal/`](../docs/specs/v1.0.0/001-kpopschool-portfolio-renewal/spec.md) — the initial rewrite (see the [design doc's rationale](../docs/specs/v1.0.0/001-kpopschool-portfolio-renewal/plan.md))
+- [`v1.1.0/001-lesson-progress-tracking/`](../docs/specs/v1.1.0/001-lesson-progress-tracking/spec.md) — per-lesson video structure + progress tracking
+- [`v1.2.0/001-lesson-quiz-certificate/`](../docs/specs/v1.2.0/001-lesson-quiz-certificate/spec.md), [`002-admin-reporting-dashboard/`](../docs/specs/v1.2.0/002-admin-reporting-dashboard/spec.md), [`003-lesson-discussion-board/`](../docs/specs/v1.2.0/003-lesson-discussion-board/spec.md) — quizzes/certificates, admin reporting, and a per-lesson discussion board
 
 ## Why a rewrite, not a refactor
 
@@ -28,6 +31,13 @@ apps/
 packages/
 └── shared-types/   Domain types shared by both apps
 ```
+
+Server-side domain modules: `teacher`, `curriculum` (lessons + optional per-lesson
+quizzes embedded on each curriculum), `event`, `faq`, `review`, `inquiry` (private
+1:1 support), `comment` (public per-lesson discussion), `user`, `payment`
+(Stripe/mock adapter), `video-class` (Zoom/mock adapter), `progress` (per-user
+lesson completion, quiz grading, certificate eligibility), `reporting`
+(admin-only aggregate stats), `demo` (frictionless demo login), `auth`.
 
 **Integration adapter pattern** (the core design decision): Stripe and Zoom
 are each behind an interface with two implementations — a real one that
@@ -104,8 +114,14 @@ explicitly rather than rely on an unset env var.
 - Zoom domain verification (`apps/web/public/Zoomverify/verifyzoom.html`) is
   a placeholder until a real Zoom app + deployed domain exist.
 - The Playwright E2E suite (`apps/web/e2e/`) has been run repeatedly against
-  the local emulator stack (8/8 passing) — see CHANGES.md for the real bugs
-  that surfaced only under actual execution (undefined-field Firestore
-  writes, eager Stripe client construction, a missing post-login redirect,
-  div-onClick cards with no accessible name). It has not been run against a
-  real Firebase project or wired into CI.
+  the local emulator stack (13/13 passing across catalog, demo login, live
+  class, purchase, admin CRUD/reports, lesson progress, quiz/certificate, and
+  discussion flows) — see `docs/specs/v1.0.0/CHANGES.md`,
+  `docs/specs/v1.1.0/CHANGES.md`, and `docs/specs/v1.2.0/CHANGES.md` for real
+  bugs (not just typos) that only surfaced under actual execution — e.g. a
+  `class-transformer`/Firestore serialization conflict, and an admin
+  "list all payments" query that had silently returned an empty array since
+  v1.0.0 because Firestore never lists a parent document that only exists via
+  a subcollection write. It has not been run against a real Firebase project
+  or wired into CI (CI currently runs typecheck/unit tests/build/secret scan
+  only — no emulator boot + E2E step yet).

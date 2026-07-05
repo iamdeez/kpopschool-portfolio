@@ -1,13 +1,14 @@
 import { defineConfig } from "@playwright/test";
 
 /**
- * T032/SC-001,004,005,006,009,010. Requires BOTH apps running against a
- * real (demo-dedicated) Firebase project — see apps/server/.env.example and
- * apps/web/.env.example. Not run in this repo's default CI job (ci.yml)
- * because that would require committing live-ish demo credentials to
- * GitHub Actions secrets; wire that up before relying on this suite as a
- * merge gate. Run locally with `pnpm --filter web run test:e2e` once both
- * `pnpm --filter server run dev` and `pnpm --filter web run dev` are up.
+ * T032/SC-001,004,005,006,009,010. Requires BOTH apps running against the
+ * Firebase Local Emulator Suite (see apps/server/.env.example and
+ * apps/web/.env.example) — no real Firebase project or live credentials
+ * needed, since INTEGRATION_MODE=demo + the emulator only require
+ * placeholder-shaped config values. Wired into CI as the `e2e` job in
+ * .github/workflows/ci.yml. Run locally with `pnpm --filter web run test:e2e`
+ * once the emulator (`pnpm run emulators`), `pnpm --filter server run dev`,
+ * and `pnpm --filter web run dev` are all up.
  */
 export default defineConfig({
   testDir: "./e2e",

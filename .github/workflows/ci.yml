@@ -36,3 +36,126 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+  e2e:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Firestore emulator needs a JVM. GitHub's ubuntu-latest image ships
+      # one already, but pin a version explicitly rather than depend on
+      # whatever happens to be preinstalled.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm --filter web exec playwright install --with-deps chromium
+
+      # No real secrets here on purpose: INTEGRATION_MODE=demo + the Firebase
+      # Local Emulator Suite need only placeholder-shaped values (see
+      # apps/server/.env.example / apps/web/.env.example) — nothing here
+      # talks to a real Firebase project, Stripe, or Zoom.
+      - name: Write emulator-only .env files
+        run: |
+          cat > apps/server/.env <<'EOF'
+          PORT=8090
+          INTEGRATION_MODE=demo
+          FIREBASE_PROJECT_ID=kpopschool-demo-local
+          FIREBASE_CLIENT_EMAIL=
+          FIREBASE_PRIVATE_KEY=
+          FIRESTORE_EMULATOR_HOST=127.0.0.1:18085
+          FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:19099
+          STRIPE_SECRET_KEY=
+          ZOOM_CLIENT_ID=
+          ZOOM_CLIENT_SECRET=
+          ZOOM_ACCOUNT_ID=
+          ZOOM_SDK_KEY=
+          ZOOM_SDK_SECRET=
+          DEMO_ACCOUNT_EMAIL=demo@kpopschool.portfolio
+          DEMO_ACCOUNT_PASSWORD=ci-demo-password-not-real
+          EOF
+          cat > apps/web/.env <<'EOF'
+          VITE_FIREBASE_API_KEY=demo-api-key
+          VITE_FIREBASE_AUTH_DOMAIN=kpopschool-demo-local.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID=kpopschool-demo-local
+          VITE_FIREBASE_STORAGE_BUCKET=kpopschool-demo-local.appspot.com
+          VITE_FIREBASE_MESSAGING_SENDER_ID=000000000000
+          VITE_FIREBASE_APP_ID=1:000000000000:web:0000000000000000000000
+          VITE_API_BASE_URL=/api
+          VITE_USE_FIREBASE_EMULATOR=true
+          VITE_FIREBASE_AUTH_EMULATOR_URL=http://127.0.0.1:19099
+          EOF
+
+      - name: Start Firebase emulators
+        run: nohup pnpm run emulators > emulators.log 2>&1 &
+
+      - name: Wait for emulators
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:14000 > /dev/null && exit 0
+            sleep 2
+          done
+          echo "Emulators did not come up in time" && cat emulators.log && exit 1
+
+      - name: Seed demo data
+        run: pnpm --filter server run seed
+
+      - name: Start backend
+        run: nohup pnpm --filter server run dev > server.log 2>&1 &
+
+      - name: Wait for backend
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8090/curriculums > /dev/null && exit 0
+            sleep 2
+          done
+          echo "Backend did not come up in time" && cat server.log && exit 1
+
+      # E2E_ADMIN_EMAIL/PASSWORD only need to exist in this emulator project —
+      # registering + promoting here is equivalent to the local
+      # `pnpm --filter server run create-admin` step in README's Getting started.
+      - name: Create E2E admin account
+        run: |
+          curl -sf -X POST http://127.0.0.1:8090/users/register -H "Content-Type: application/json" \
+            -d '{"email":"e2e-admin@kpopschool.ci","password":"CiE2eAdmin123!","name":"CI E2E Admin"}'
+          pnpm --filter server run create-admin e2e-admin@kpopschool.ci
+
+      - name: Start frontend
+        run: nohup pnpm --filter web run dev > web.log 2>&1 &
+
+      - name: Wait for frontend
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:5173 > /dev/null && exit 0
+            sleep 2
+          done
+          echo "Frontend did not come up in time" && cat web.log && exit 1
+
+      - name: Run Playwright E2E suite
+        env:
+          E2E_ADMIN_EMAIL: e2e-admin@kpopschool.ci
+          E2E_ADMIN_PASSWORD: CiE2eAdmin123!
+        run: pnpm --filter web run test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report/
+          retention-days: 7
