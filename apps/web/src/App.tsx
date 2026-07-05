@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
-import { Spinner, Center } from "@chakra-ui/react";
+import { Spinner, Center, Box } from "@chakra-ui/react";
 import { Topbar } from "./components/Topbar";
 import { Footer } from "./components/Footer";
 import { RequireAuth, RequireAdmin } from "./auth/RouteGuards";
@@ -55,58 +55,60 @@ export function App() {
           element={
             <>
               <Topbar />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/teachers" element={<Teachers />} />
-                <Route path="/teachers/:id" element={<TeacherDetail />} />
-                <Route path="/curriculum" element={<CurriculumList />} />
-                <Route path="/curriculum/:id" element={<CurriculumDetail />} />
-                <Route
-                  path="/curriculum/:curriculumId/lessons"
-                  element={
-                    <RequireAuth>
-                      <LessonPlayer />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/curriculum/:curriculumId/certificate"
-                  element={
-                    <RequireAuth>
-                      <CertificatePage />
-                    </RequireAuth>
-                  }
-                />
-                <Route path="/community" element={<Community />} />
-                <Route path="/signin" element={<Login />} />
-                <Route path="/signup" element={<SignUp />} />
-                <Route path="/signout" element={<SignOut />} />
-                <Route
-                  path="/mypage"
-                  element={
-                    <RequireAuth>
-                      <MyPage />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/payment/:productId"
-                  element={
-                    <RequireAuth>
-                      <Payment />
-                    </RequireAuth>
-                  }
-                />
-                <Route path="/payment/result" element={<PaymentResult />} />
-                <Route
-                  path="/classroom/:curriculumId"
-                  element={
-                    <RequireAuth>
-                      <Classroom />
-                    </RequireAuth>
-                  }
-                />
-              </Routes>
+              <Box as="main">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/teachers" element={<Teachers />} />
+                  <Route path="/teachers/:id" element={<TeacherDetail />} />
+                  <Route path="/curriculum" element={<CurriculumList />} />
+                  <Route path="/curriculum/:id" element={<CurriculumDetail />} />
+                  <Route
+                    path="/curriculum/:curriculumId/lessons"
+                    element={
+                      <RequireAuth>
+                        <LessonPlayer />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/curriculum/:curriculumId/certificate"
+                    element={
+                      <RequireAuth>
+                        <CertificatePage />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route path="/community" element={<Community />} />
+                  <Route path="/signin" element={<Login />} />
+                  <Route path="/signup" element={<SignUp />} />
+                  <Route path="/signout" element={<SignOut />} />
+                  <Route
+                    path="/mypage"
+                    element={
+                      <RequireAuth>
+                        <MyPage />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/payment/:productId"
+                    element={
+                      <RequireAuth>
+                        <Payment />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route path="/payment/result" element={<PaymentResult />} />
+                  <Route
+                    path="/classroom/:curriculumId"
+                    element={
+                      <RequireAuth>
+                        <Classroom />
+                      </RequireAuth>
+                    }
+                  />
+                </Routes>
+              </Box>
               <Footer />
             </>
           }

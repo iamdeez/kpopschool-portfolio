@@ -10,9 +10,10 @@ test("home page lists teachers, curriculums, and FAQ", async ({ page }) => {
 
 test("teacher list navigates to a teacher's detail page", async ({ page }) => {
   await page.goto("/teachers");
-  // Each card is a RouterLink with an aria-label (not visible "View profile"
-  // text) — see Teachers.tsx TeacherCard.
-  await page.getByRole("link", { name: /View .+'s profile/ }).first().click();
+  // TeacherCard has no aria-label override (see Teachers.tsx — WCAG 2.5.3),
+  // so its accessible name is its own visible text: "{name}" + "{category}
+  // Trainer". Every card matches "Trainer", so this reliably finds one.
+  await page.getByRole("link", { name: /Trainer/ }).first().click();
   await expect(page).toHaveURL(/\/teachers\/.+/);
 });
 

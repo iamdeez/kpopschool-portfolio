@@ -21,6 +21,7 @@ test("demo visitor buys a course, completes a lesson, and sees progress reflecte
 
   await page.goto("/curriculum");
   await page.getByRole("link", { name: "View details" }).nth(2).click();
+  const curriculumId = new URL(page.url()).pathname.split("/").filter(Boolean).pop();
   await page.getByRole("link", { name: "Watch lessons" }).click();
   await expect(page).toHaveURL(/\/curriculum\/.+\/lessons/);
 
@@ -35,7 +36,14 @@ test("demo visitor buys a course, completes a lesson, and sees progress reflecte
 
   await page.goto("/mypage");
   await page.getByRole("tab", { name: "My progress" }).click();
-  await expect(page.getByText(/^1\/\d+ lessons completed \(\d+%\)$/)).toBeVisible();
+  // The shared demo account can have several purchased-and-partially-completed
+  // curriculums showing on this tab at once (e.g. lesson-quiz-certificate.spec.ts
+  // also leaves one at "1 lesson done" in the same run), so a bare progress-text
+  // regex match is ambiguous across cards. Scope to this specific curriculum's
+  // card via its MyPage title link href (`/curriculum/{id}/lessons`, see
+  // MyPage.tsx) instead.
+  const card = page.locator(`a[href="/curriculum/${curriculumId}/lessons"]`).locator("xpath=../..");
+  await expect(card.getByText(/^1\/\d+ lessons completed \(\d+%\)$/)).toBeVisible();
 });
 
 // SC-002: a visitor who hasn't purchased the course sees a locked screen, not the video.

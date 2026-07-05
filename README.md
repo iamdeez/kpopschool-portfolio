@@ -109,19 +109,33 @@ platform you deploy to — it's the default, but deployments should pin it
 explicitly rather than rely on an unset env var.
 
 **Known gaps, disclosed rather than hidden:**
-- Lighthouse Performance/Accessibility targets (spec.md NFR-004/005) are
-  aspirational — they haven't been measured against a live deployment yet.
+- Lighthouse (mobile, against a local production build — no live deployment
+  yet): **Accessibility is effectively perfect** after fixing everything
+  found (Home 99, Teachers 100, Curriculum 100 — up from 93/95/94). Third-party
+  images (`i.pravatar.cc`, `picsum.photos`) were replaced with self-hosted SVG
+  data URIs, the 656kB main JS chunk was split into cacheable vendor chunks,
+  a `<main>` landmark was added, and every color-contrast/label-mismatch
+  failure was fixed (including a couple only found once the rest were fixed
+  and the pages were re-measured — see `docs/specs/v1.0.0/CHANGES.md`).
+  **Performance still doesn't hit 90** (Home 72, Teachers 85, Curriculum 77 —
+  up from 71/76/77): the remaining gap is root-caused to two things Lighthouse's
+  data confirms directly — Lighthouse's mobile Lantern simulation model being
+  pessimistic about Firebase Auth's `apis.google.com` iframe (unavoidable
+  without dropping Firebase Auth), and several unoptimized local PNG assets
+  Home imports (up to 783kB uncompressed) that a real CDN + image pipeline
+  would likely shrink a lot. Observed (real, unthrottled) LCP was under 1s on
+  every page throughout. Needs re-measuring after a real deployment exists.
 - Zoom domain verification (`apps/web/public/Zoomverify/verifyzoom.html`) is
   a placeholder until a real Zoom app + deployed domain exist.
-- The Playwright E2E suite (`apps/web/e2e/`) has been run repeatedly against
-  the local emulator stack (13/13 passing across catalog, demo login, live
-  class, purchase, admin CRUD/reports, lesson progress, quiz/certificate, and
-  discussion flows) — see `docs/specs/v1.0.0/CHANGES.md`,
-  `docs/specs/v1.1.0/CHANGES.md`, and `docs/specs/v1.2.0/CHANGES.md` for real
-  bugs (not just typos) that only surfaced under actual execution — e.g. a
-  `class-transformer`/Firestore serialization conflict, and an admin
-  "list all payments" query that had silently returned an empty array since
-  v1.0.0 because Firestore never lists a parent document that only exists via
-  a subcollection write. It has not been run against a real Firebase project
-  or wired into CI (CI currently runs typecheck/unit tests/build/secret scan
-  only — no emulator boot + E2E step yet).
+- The Playwright E2E suite (`apps/web/e2e/`) passes 13/13 both locally and in
+  CI (`.github/workflows/ci.yml`'s `e2e` job, verified against the actual
+  GitHub Actions run at https://github.com/iamdeez/kpopschool-portfolio) —
+  see `docs/specs/v1.0.0/CHANGES.md`, `docs/specs/v1.1.0/CHANGES.md`,
+  `docs/specs/v1.2.0/CHANGES.md`, and `docs/specs/v1.2.1/CHANGES.md` for real
+  bugs (not just typos) that only surfaced under actual execution — a
+  `class-transformer`/Firestore serialization conflict, an admin "list all
+  payments" query that had silently returned an empty array since v1.0.0, and
+  four CI-only failures (pnpm/action-setup version conflict, a JDK version
+  too old for firebase-tools, a missing shared-types build step, and a
+  Vite dev-server IPv4/IPv6 binding mismatch). It has not been run against a
+  real Firebase project.

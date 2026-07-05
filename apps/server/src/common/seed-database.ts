@@ -1,6 +1,12 @@
 import type { Firestore } from "firebase-admin/firestore";
 import { randomUUID } from "node:crypto";
 import type { Lesson } from "@kpopschool/shared-types";
+import { initialsAvatar, labelThumbnail } from "./placeholder-image";
+
+// Mirrors apps/web/src/theme.ts's brand palette (kept as a plain literal
+// here rather than a shared import — this is server-only seed data, not
+// something the web app's theme module should be imported into).
+const BRAND = { popyellow: "#FFCC00", popblue: "#00B2FF", popmint: "#00C3BA", popmag: "#FF3CA2" };
 
 // A public-domain sample clip (no real licensed course content) reused across
 // every seeded lesson — v1.1.0 FR-007/ASM-001.
@@ -59,7 +65,6 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       rating: 4.9,
       review: 2,
       student: 34,
-      profile: "https://i.pravatar.cc/400?img=47",
     },
     {
       category: "Vocal",
@@ -68,7 +73,6 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       rating: 4.7,
       review: 1,
       student: 19,
-      profile: "https://i.pravatar.cc/400?img=32",
     },
     {
       category: "Dance",
@@ -77,7 +81,6 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       rating: 4.8,
       review: 2,
       student: 41,
-      profile: "https://i.pravatar.cc/400?img=13",
     },
     {
       category: "Dance",
@@ -86,7 +89,6 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       rating: 4.6,
       review: 1,
       student: 27,
-      profile: "https://i.pravatar.cc/400?img=25",
     },
   ] as const;
 
@@ -101,7 +103,7 @@ export async function seedDatabase(firestore: Firestore): Promise<{
         rating: seed.rating,
         review: seed.review,
         student: seed.student,
-        profile: seed.profile,
+        profile: initialsAvatar(seed.name, seed.category === "Vocal" ? BRAND.popmint : BRAND.popmag),
       }),
     ),
   );
@@ -117,7 +119,7 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       difficulty: "Beginner",
       totalSessions: 8,
       price: 12000,
-      image: "https://picsum.photos/seed/vocal-beginner/600/400",
+      image: labelThumbnail("Vocal · Beginner", BRAND.popmint),
       description: "An 8-session beginner-friendly vocal course covering breath support, pitch, and tone.",
     },
     {
@@ -128,7 +130,7 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       difficulty: "Intermediate",
       totalSessions: 10,
       price: 15000,
-      image: "https://picsum.photos/seed/vocal-intermediate/600/400",
+      image: labelThumbnail("Vocal · Intermediate", BRAND.popmint),
       description: "10 sessions building agile vocal runs, ad-libs, and stylistic phrasing for K-pop vocal lines.",
     },
     {
@@ -139,7 +141,7 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       difficulty: "Advanced",
       totalSessions: 12,
       price: 19000,
-      image: "https://picsum.photos/seed/vocal-advanced/600/400",
+      image: labelThumbnail("Vocal · Advanced", BRAND.popmint),
       description: "Advanced 1:1 coaching for trainees preparing for agency evaluations and debut showcases.",
     },
     {
@@ -150,7 +152,7 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       difficulty: "Beginner",
       totalSessions: 8,
       price: 12000,
-      image: "https://picsum.photos/seed/dance-beginner/600/400",
+      image: labelThumbnail("Dance · Beginner", BRAND.popmag),
       description: "An 8-session beginner-friendly K-pop dance course covering basic isolations and choreography.",
     },
     {
@@ -161,7 +163,7 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       difficulty: "Intermediate",
       totalSessions: 6,
       price: 9000,
-      image: "https://picsum.photos/seed/dance-intermediate/600/400",
+      image: labelThumbnail("Dance · Intermediate", BRAND.popmag),
       description: "Small-group sessions drilling the signature 'point choreography' moves from popular title tracks.",
     },
     {
@@ -172,7 +174,7 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       difficulty: "Advanced",
       totalSessions: 10,
       price: 18000,
-      image: "https://picsum.photos/seed/dance-advanced/600/400",
+      image: labelThumbnail("Dance · Advanced", BRAND.popmag),
       description: "Advanced formation, facial expression, and camera-work training for stage and broadcast readiness.",
     },
   ] as const;
@@ -208,19 +210,19 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       title: "Welcome discount",
       description: "10% off your first booking.",
       discountAmount: 10,
-      thumbnail: "https://picsum.photos/seed/event-welcome/600/300",
+      thumbnail: labelThumbnail("Welcome", BRAND.popyellow, 600, 300),
     },
     {
       title: "Summer vocal camp",
       description: "Book 3 vocal sessions, get 1 free.",
       discountAmount: 25,
-      thumbnail: "https://picsum.photos/seed/event-summer/600/300",
+      thumbnail: labelThumbnail("Summer Camp", BRAND.popmint, 600, 300),
     },
     {
       title: "Referral bonus",
       description: "Refer a friend and both get 15% off.",
       discountAmount: 15,
-      thumbnail: "https://picsum.photos/seed/event-referral/600/300",
+      thumbnail: labelThumbnail("Referral", BRAND.popblue, 600, 300),
     },
   ];
   await Promise.all(
@@ -282,7 +284,7 @@ export async function seedDatabase(firestore: Firestore): Promise<{
   await firestore.collection("HOME").doc().set({
     createdAt: now,
     bannerTitle: "Learn K-Pop Dance & Vocal Online",
-    bannerImage: "https://picsum.photos/seed/kpopschool-banner/1200/400",
+    bannerImage: labelThumbnail("Learn K-Pop Dance & Vocal Online", BRAND.popmag, 1200, 400),
   });
 
   const productRefs = curriculumRefs.map(({ seed, ref }) => ({

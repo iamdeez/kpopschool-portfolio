@@ -1,5 +1,5 @@
 import { Box, Container, Flex, HStack, Image, Stack, Text } from "@chakra-ui/react";
-import { brandDarkTeal, brandFadedTeal, brandMintText } from "../theme";
+import { brandDarkTeal, brandFadedTealText, brandMintText } from "../theme";
 import kpopLogo from "../assets/Logo/KpopLogo.png";
 
 /** Ported from the original kpopschool/src/Component/Footer.js. */
@@ -19,7 +19,8 @@ export function Footer() {
             </Stack>
           </HStack>
           <Box display="flex" justifyContent="center">
-            <Text color={brandFadedTeal} fontSize="lg">
+            {/* Lighthouse-confirmed: brandFadedTeal on brandDarkTeal is 3.94:1, needs 4.5:1. */}
+            <Text color={brandFadedTealText} fontSize="lg">
               @copyright. kpopschool portfolio demo. All Rights Reserved.
             </Text>
           </Box>

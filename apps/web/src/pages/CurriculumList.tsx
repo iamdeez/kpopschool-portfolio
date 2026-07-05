@@ -3,7 +3,7 @@ import { Box, Container, Flex, Image, Link as ChakraLink, SimpleGrid, Skeleton, 
 import { FiChevronRight } from "react-icons/fi";
 import { Link as RouterLink } from "react-router-dom";
 import { useCurriculums } from "../api/hooks";
-import { popmag, popmint } from "../theme";
+import { popmag, popmagText, popmintText } from "../theme";
 import curriculumDance from "../assets/Image/Curriculum_dance.png";
 import curriculumVocal from "../assets/Image/Curriculum_vocal.png";
 
@@ -19,7 +19,7 @@ export function CurriculumList() {
       <Flex fontWeight="300" fontSize="xl" color="#4E4E4E" align="center" justify="flex-end">
         <Text>Curriculum</Text>
         <FiChevronRight />
-        <Text color={popmint}>Intro</Text>
+        <Text color={popmintText}>Intro</Text>
       </Flex>
 
       <Box py={6}>
@@ -42,7 +42,8 @@ export function CurriculumList() {
             as={RouterLink}
             key={hero.key}
             to="/curriculum"
-            aria-label={`Browse ${hero.key} curriculum`}
+            // WCAG 2.5.3 (Label in Name): no aria-label override — see
+            // Teachers.tsx TeacherCard for why.
             _hover={{ textDecoration: "none" }}
             borderRadius="xl"
             pt={48}
@@ -84,10 +85,10 @@ export function CurriculumList() {
                 <Text fontWeight="bold" fontSize="xl">
                   {curriculum.title}
                 </Text>
-                <Text fontSize="sm" color="gray.500">
+                <Text fontSize="sm" color="gray.600">
                   {curriculum.category} · {curriculum.difficulty} · {curriculum.totalSessions} sessions
                 </Text>
-                <Text fontWeight="semibold" mt={1} color={popmag}>
+                <Text fontWeight="semibold" mt={1} color={popmagText}>
                   ${(curriculum.price / 100).toFixed(2)}
                 </Text>
                 <Button
@@ -96,8 +97,8 @@ export function CurriculumList() {
                   size="sm"
                   mt={2}
                   variant="outline"
-                  color={popmint}
-                  borderColor={popmint}
+                  color={popmintText}
+                  borderColor={popmintText}
                 >
                   View details
                 </Button>

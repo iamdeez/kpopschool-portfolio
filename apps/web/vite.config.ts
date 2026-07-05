@@ -3,6 +3,27 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        // The main entry chunk was 656kB — over Rollup's 500kB warning
+        // threshold — because every vendor dependency (React, Chakra,
+        // Firebase Auth, react-query) landed in one file alongside app code.
+        // Splitting vendor code into its own cacheable chunks doesn't
+        // shrink the total bytes shipped on a cold load (Firebase Auth is
+        // still needed synchronously — AuthContext wraps the whole app), but
+        // it means a deploy that only touches app code doesn't invalidate
+        // the vendor chunks' browser cache, and it lets the browser fetch
+        // the chunks in parallel over HTTP/2 instead of one blocking file.
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-chakra": ["@chakra-ui/react", "@chakra-ui/icons", "@emotion/react", "@emotion/styled", "framer-motion"],
+          "vendor-firebase": ["firebase/app", "firebase/auth"],
+          "vendor-query": ["@tanstack/react-query"],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     // Without an explicit host, Vite's dev server binds to the "localhost"

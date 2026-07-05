@@ -2,7 +2,7 @@ import { Box, Button, Center, Container, Heading, HStack, Image, Link as ChakraL
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useTeachers, useCurriculums, useFaqs, useDemoLogin } from "../api/hooks";
 import { signInWithDemoToken } from "../firebase/auth";
-import { popyellow, popblue, popmint, popmag, brandGray, brandLightGray } from "../theme";
+import { popmag, popyellowText, popblueText, popmintText, popmagText, brandGray, brandLightGray } from "../theme";
 import { BannerSlider } from "../components/BannerSlider";
 import { ImageCarousel } from "../components/ImageCarousel";
 import kpopBanner from "../assets/Image/K-popBanner.png";
@@ -43,11 +43,14 @@ export function Home() {
     }
   };
 
+  // Lighthouse-confirmed: the raw brand colors fail contrast both as text on
+  // white and as a button background under white text (e.g. popyellow at
+  // 1.51:1, needs 4.5:1) — use the accessible dark variants here instead.
   const tiers = [
-    { name: "Beginner", color: popyellow, image: curriculumVocal, price: 80 },
-    { name: "Intermediate", color: popmint, image: curriculumDance, price: 85 },
-    { name: "Advanced", color: popblue, image: curriculumVocal, price: 90 },
-    { name: "Professional", color: popmag, image: curriculumDance, price: 99 },
+    { name: "Beginner", color: popyellowText, image: curriculumVocal, price: 80 },
+    { name: "Intermediate", color: popmintText, image: curriculumDance, price: 85 },
+    { name: "Advanced", color: popblueText, image: curriculumVocal, price: 90 },
+    { name: "Professional", color: popmagText, image: curriculumDance, price: 99 },
   ];
 
   return (
@@ -90,7 +93,7 @@ export function Home() {
         <Container minW="container.xl" pb={24}>
           <Stack spacing={16}>
             <Stack id="Teachers">
-              <Heading as="h2" fontSize="6xl" color={popyellow}>
+              <Heading as="h2" fontSize="6xl" color={popyellowText}>
                 Teachers
               </Heading>
               <SimpleGrid columns={[1, 2, 4]} spacing={8} pt={4}>
@@ -99,7 +102,10 @@ export function Home() {
                     as={RouterLink}
                     key={teacher.id}
                     to={`/teachers/${teacher.id}`}
-                    aria-label={`View ${teacher.name}'s profile`}
+                    // WCAG 2.5.3 (Label in Name): no aria-label override —
+                    // see Teachers.tsx TeacherCard for why (axe's rule kept
+                    // failing against a reordered/appended label; the link's
+                    // own visible content is already a sufficient name).
                     _hover={{ textDecoration: "none" }}
                   >
                     <Stack spacing={1}>
@@ -117,7 +123,7 @@ export function Home() {
                       <Text fontSize="2xl" fontWeight="600">
                         {teacher.name}
                       </Text>
-                      <Text fontSize="lg" color="gray.500">
+                      <Text fontSize="lg" color="gray.600">
                         {teacher.category} Trainer
                       </Text>
                     </Stack>
@@ -138,7 +144,7 @@ export function Home() {
                   <Stack w="full" justify="space-between" fontSize="2xl" h="full">
                     <Text>Solo vocal coaching for K-pop idol vocal lines — pitch, tone, and stage presence.</Text>
                     <Box>
-                      <Button color="white" bgColor={popmint} size="lg" px={16} py={4} onClick={() => navigate("/curriculum")}>
+                      <Button color="white" bgColor={popmintText} size="lg" px={16} py={4} onClick={() => navigate("/curriculum")}>
                         Go CURRICULUM
                       </Button>
                     </Box>
@@ -148,7 +154,7 @@ export function Home() {
                   <Stack w="full" justify="space-between" fontSize="2xl" h="full">
                     <Text>Choreography training for K-pop dance breaks, formation, and camera work.</Text>
                     <Box display="flex" justifyContent="flex-end">
-                      <Button color="white" bgColor={popmint} size="lg" px={16} py={4} onClick={() => navigate("/curriculum")}>
+                      <Button color="white" bgColor={popmintText} size="lg" px={16} py={4} onClick={() => navigate("/curriculum")}>
                         Go CURRICULUM
                       </Button>
                     </Box>
@@ -161,7 +167,7 @@ export function Home() {
             </Stack>
 
             <Stack id="Our Courses">
-              <Heading as="h2" fontSize="6xl" color={popblue}>
+              <Heading as="h2" fontSize="6xl" color={popblueText}>
                 Our Courses
               </Heading>
               <HStack justify="space-between" spacing={8} align="stretch" pt={4} flexWrap="wrap">
@@ -195,15 +201,16 @@ export function Home() {
               </Heading>
               <HStack justify="space-between" align="flex-start" spacing={8} pt={4} flexWrap="wrap">
                 {[
-                  { key: "1-1", label: "1:1 Personal", color: popyellow, image: event1, description: "One-on-one live sessions matched to your goals." },
-                  { key: "1-6", label: "1:6 Group", color: popmint, image: checkerImage, description: "Small-group classes to train and perform together." },
-                  { key: "vod", label: "VOD", color: popblue, image: videoImage, description: "Self-paced recorded lessons, watch anytime." },
+                  { key: "1-1", label: "1:1 Personal", color: popyellowText, image: event1, description: "One-on-one live sessions matched to your goals." },
+                  { key: "1-6", label: "1:6 Group", color: popmintText, image: checkerImage, description: "Small-group classes to train and perform together." },
+                  { key: "vod", label: "VOD", color: popblueText, image: videoImage, description: "Self-paced recorded lessons, watch anytime." },
                 ].map((type) => (
                   <ChakraLink
                     key={type.key}
                     as={RouterLink}
                     to="/curriculum"
-                    aria-label={`Browse ${type.label} lessons`}
+                    // WCAG 2.5.3 (Label in Name): no aria-label override —
+                    // see Teachers.tsx TeacherCard for why.
                     _hover={{ textDecoration: "none" }}
                     w="full"
                   >
@@ -221,7 +228,7 @@ export function Home() {
 
             {curriculums.data && curriculums.data.length > 0 && (
               <Stack>
-                <Heading as="h2" fontSize="6xl" color={popyellow}>
+                <Heading as="h2" fontSize="6xl" color={popyellowText}>
                   Popular Curriculums
                 </Heading>
                 <SimpleGrid columns={[1, 2, 3]} spacing={8} pt={4}>
@@ -230,8 +237,8 @@ export function Home() {
                       <Text fontWeight="bold" fontSize="xl">
                         {curriculum.title}
                       </Text>
-                      <Text color="gray.500">${(curriculum.price / 100).toFixed(2)}</Text>
-                      <Button as={RouterLink} to={`/curriculum/${curriculum.id}`} size="sm" mt={2} colorScheme="teal">
+                      <Text color="gray.600">${(curriculum.price / 100).toFixed(2)}</Text>
+                      <Button as={RouterLink} to={`/curriculum/${curriculum.id}`} size="sm" mt={2} bgColor={popmintText} color="white">
                         View curriculum
                       </Button>
                     </Box>
@@ -261,14 +268,14 @@ export function Home() {
         <Center bgColor={brandLightGray} py={24}>
           <Stack align="center" spacing={8}>
             <HStack fontSize={["48px", "80px", "140px"]} spacing={8} fontWeight="bold" whiteSpace="nowrap">
-              <Text color={popmint}>Be a</Text>
-              <Text color={popyellow}>STAR</Text>
-              <Text color={popmint}>with us!</Text>
+              <Text color={popmintText}>Be a</Text>
+              <Text color={popyellowText}>STAR</Text>
+              <Text color={popmintText}>with us!</Text>
             </HStack>
             <Button
               size="lg"
               colorScheme="purple"
-              bgColor={popmag}
+              bgColor={popmagText}
               color="white"
               isLoading={demoLogin.isPending}
               onClick={handleDemoLogin}

@@ -3,7 +3,7 @@ import { Box, Button, ButtonGroup, Container, Flex, HStack, Image, Stack } from 
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { signOut } from "../firebase/auth";
-import { popmint } from "../theme";
+import { popmintText } from "../theme";
 import kpopLogo from "../assets/Logo/KpopLogo.png";
 import logoTitle from "../assets/Logo/LogoTitle.png";
 
@@ -36,8 +36,8 @@ export function Topbar() {
                 w="140px"
                 bgColor="white"
                 borderRadius={0}
-                _hover={{ color: popmint }}
-                color={isActive("/teachers") ? popmint : "black"}
+                _hover={{ color: popmintText }}
+                color={isActive("/teachers") ? popmintText : "black"}
               >
                 Teachers
               </Button>
@@ -48,17 +48,17 @@ export function Topbar() {
                   w="140px"
                   bgColor="white"
                   borderRadius={0}
-                  _hover={{ color: popmint }}
-                  color={isActive("/curriculum") ? popmint : "black"}
+                  _hover={{ color: popmintText }}
+                  color={isActive("/curriculum") ? popmintText : "black"}
                 >
                   Curriculum
                 </Button>
                 {hovered === "curriculum" && (
                   <Stack position="absolute" top={12} w="full" bgColor="white" boxShadow="md" zIndex={10}>
-                    <Button borderRadius={0} bgColor="white" _hover={{ color: popmint }} onClick={() => navigate("/curriculum")}>
+                    <Button borderRadius={0} bgColor="white" _hover={{ color: popmintText }} onClick={() => navigate("/curriculum")}>
                       Vocal
                     </Button>
-                    <Button borderRadius={0} bgColor="white" _hover={{ color: popmint }} onClick={() => navigate("/curriculum")}>
+                    <Button borderRadius={0} bgColor="white" _hover={{ color: popmintText }} onClick={() => navigate("/curriculum")}>
                       Dance
                     </Button>
                   </Stack>
@@ -70,8 +70,8 @@ export function Topbar() {
                 w="140px"
                 bgColor="white"
                 borderRadius={0}
-                _hover={{ color: popmint }}
-                color={isActive("/community") ? popmint : "black"}
+                _hover={{ color: popmintText }}
+                color={isActive("/community") ? popmintText : "black"}
               >
                 Community
               </Button>
@@ -83,17 +83,18 @@ export function Topbar() {
                     w="140px"
                     bgColor="white"
                     borderRadius={0}
-                    _hover={{ color: popmint }}
-                    color={isActive("/mypage") ? popmint : "black"}
+                    _hover={{ color: popmintText }}
+                    color={isActive("/mypage") ? popmintText : "black"}
                   >
                     My Page
                   </Button>
-                  <Button variant="solid" bgColor="#E1E4E4" color="white" onClick={() => signOut()}>
+                  <Button variant="solid" bgColor="gray.600" color="white" onClick={() => signOut()}>
                     LOG OUT
                   </Button>
                 </>
               ) : (
-                <Button variant="solid" color="white" bgColor={popmint} onClick={() => navigate("/signin")}>
+                // Lighthouse-confirmed: popmint under white text is 2.2:1, needs 4.5:1 — popmintText fixes it.
+                <Button variant="solid" color="white" bgColor={popmintText} onClick={() => navigate("/signin")}>
                   LOG IN
                 </Button>
               )}
