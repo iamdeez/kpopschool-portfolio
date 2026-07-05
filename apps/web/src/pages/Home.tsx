@@ -6,12 +6,12 @@ import { popmag, popyellowText, popblueText, popmintText, popmagText, brandGray,
 import { BannerSlider } from "../components/BannerSlider";
 import { ImageCarousel } from "../components/ImageCarousel";
 import kpopBanner from "../assets/Image/K-popBanner.png";
-import banner1 from "../assets/Image/banner1.png";
-import vocalImage from "../assets/Image/vocal.png";
-import danceImage from "../assets/Image/dance.png";
-import curriculumVocal from "../assets/Image/Curriculum_vocal.png";
-import curriculumDance from "../assets/Image/Curriculum_dance.png";
-import event1 from "../assets/Image/event1.png";
+import banner1 from "../assets/Image/banner1.webp";
+import vocalImage from "../assets/Image/vocal.webp";
+import danceImage from "../assets/Image/dance.webp";
+import curriculumVocal from "../assets/Image/Curriculum_vocal.webp";
+import curriculumDance from "../assets/Image/Curriculum_dance.webp";
+import event1 from "../assets/Image/event1.webp";
 import videoImage from "../assets/Image/video.png";
 import checkerImage from "../assets/Image/checker.png";
 

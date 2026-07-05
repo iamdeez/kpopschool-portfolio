@@ -117,14 +117,16 @@ explicitly rather than rely on an unset env var.
   a `<main>` landmark was added, and every color-contrast/label-mismatch
   failure was fixed (including a couple only found once the rest were fixed
   and the pages were re-measured — see `docs/specs/v1.0.0/CHANGES.md`).
-  **Performance still doesn't hit 90** (Home 72, Teachers 85, Curriculum 77 —
-  up from 71/76/77): the remaining gap is root-caused to two things Lighthouse's
-  data confirms directly — Lighthouse's mobile Lantern simulation model being
-  pessimistic about Firebase Auth's `apis.google.com` iframe (unavoidable
-  without dropping Firebase Auth), and several unoptimized local PNG assets
-  Home imports (up to 783kB uncompressed) that a real CDN + image pipeline
-  would likely shrink a lot. Observed (real, unthrottled) LCP was under 1s on
-  every page throughout. Needs re-measuring after a real deployment exists.
+  **Performance: Curriculum now passes (93)**, Home and Teachers don't yet
+  (78 and 85, up from 71/76/77 originally) — after converting several
+  unoptimized local PNGs (up to 783kB, saved as lossless PNG despite being
+  photographic content) to WebP at their existing dimensions, no resizing
+  needed (91% smaller in total, see `docs/specs/v1.0.0/CHANGES.md`). The
+  remaining gap on Home/Teachers is confirmed (via Lighthouse's own
+  network-requests audit) to be entirely Firebase Auth's `apis.google.com`
+  gapi iframe, loaded twice per page — unavoidable without dropping Firebase
+  Auth. Observed (real, unthrottled) LCP was under 1s on every page
+  throughout. Needs re-measuring after a real deployment exists.
 - Zoom domain verification (`apps/web/public/Zoomverify/verifyzoom.html`) is
   a placeholder until a real Zoom app + deployed domain exist.
 - The Playwright E2E suite (`apps/web/e2e/`) passes 13/13 both locally and in

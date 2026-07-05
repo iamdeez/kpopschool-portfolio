@@ -4,8 +4,8 @@ import { Link as RouterLink, useParams } from "react-router-dom";
 import { useCurriculum, useProductByCurriculum, useTeacher } from "../api/hooks";
 import { useAuth } from "../auth/AuthContext";
 import { popmag, popmint } from "../theme";
-import curriculumDance from "../assets/Image/Curriculum_dance.png";
-import curriculumVocal from "../assets/Image/Curriculum_vocal.png";
+import curriculumDance from "../assets/Image/Curriculum_dance.webp";
+import curriculumVocal from "../assets/Image/Curriculum_vocal.webp";
 
 export function CurriculumDetail() {
   const { id } = useParams<{ id: string }>();

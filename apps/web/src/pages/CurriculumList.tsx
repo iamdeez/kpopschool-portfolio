@@ -4,8 +4,8 @@ import { FiChevronRight } from "react-icons/fi";
 import { Link as RouterLink } from "react-router-dom";
 import { useCurriculums } from "../api/hooks";
 import { popmag, popmagText, popmintText } from "../theme";
-import curriculumDance from "../assets/Image/Curriculum_dance.png";
-import curriculumVocal from "../assets/Image/Curriculum_vocal.png";
+import curriculumDance from "../assets/Image/Curriculum_dance.webp";
+import curriculumVocal from "../assets/Image/Curriculum_vocal.webp";
 
 /** Ported from the original kpopschool/src/Page/CS/Curriculum/Curriculum.js (hero cards)
  * combined with the curriculum grid, since this demo doesn't split into a
