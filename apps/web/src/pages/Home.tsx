@@ -44,10 +44,10 @@ export function Home() {
   // white and as a button background under white text (e.g. popyellow at
   // 1.51:1, needs 4.5:1) — use the accessible dark variants here instead.
   const tiers = [
-    { name: "Beginner", color: popyellowText, image: curriculumVocal, price: 80 },
-    { name: "Intermediate", color: popmintText, image: curriculumDance, price: 85 },
-    { name: "Advanced", color: popblueText, image: curriculumVocal, price: 90 },
-    { name: "Professional", color: popmagText, image: curriculumDance, price: 99 },
+    { name: "Beginner", color: popyellowText, image: curriculumVocal, price: 80, description: "Never trained before? Start here — fundamentals only, at your own pace." },
+    { name: "Intermediate", color: popmintText, image: curriculumDance, price: 85, description: "You've got the basics down. Now it's about consistency and cleaner technique." },
+    { name: "Advanced", color: popblueText, image: curriculumVocal, price: 90, description: "For trainees prepping for evaluations — real critique, no hand-holding." },
+    { name: "Professional", color: popmagText, image: curriculumDance, price: 99, description: "1:1 with a working idol trainer, built around your debut or showcase timeline." },
   ];
 
   return (
@@ -167,7 +167,7 @@ export function Home() {
                       <Text color={tier.color} fontSize="3xl" fontWeight="bold">
                         {tier.name}
                       </Text>
-                      <Text fontSize="lg">1:1 personal sessions with a dedicated idol trainer.</Text>
+                      <Text fontSize="lg">{tier.description}</Text>
                     </Stack>
                     <Button
                       bgColor={tier.color}

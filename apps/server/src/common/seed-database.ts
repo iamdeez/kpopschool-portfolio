@@ -61,7 +61,8 @@ export async function seedDatabase(firestore: Firestore): Promise<{
     {
       category: "Vocal",
       name: "Jiwoo Han",
-      career: "Former lead vocal coach at a major Seoul entertainment agency, 12+ years training debut idol vocalists.",
+      career:
+        "Spent 12 years as lead vocal coach inside a Seoul entertainment agency's trainee program, shaping the vocal lines for three separate debut groups before moving to 1:1 coaching full-time.",
       rating: 4.9,
       review: 2,
       student: 34,
@@ -70,7 +71,8 @@ export async function seedDatabase(firestore: Firestore): Promise<{
     {
       category: "Vocal",
       name: "Minji Seo",
-      career: "Session vocalist and vocal-run specialist, focuses on breath control and English pronunciation for global debuts.",
+      career:
+        "Session vocalist for indie and idol releases alike, with a reputation for turning shaky ad-libs into clean, confident runs. Also coaches English pronunciation for trainees prepping for global promotion.",
       rating: 4.7,
       review: 1,
       student: 19,
@@ -79,7 +81,8 @@ export async function seedDatabase(firestore: Firestore): Promise<{
     {
       category: "Dance",
       name: "Jinho Kang",
-      career: "10+ years choreographing for K-pop idol groups, specializes in point choreography and stage formations.",
+      career:
+        "Choreographed point moves and stage formations for K-pop idol groups for over a decade — the kind of 8-count everyone in the fandom ends up learning from a fancam. Now teaches the same formation drills 1:1.",
       rating: 4.8,
       review: 2,
       student: 41,
@@ -88,7 +91,8 @@ export async function seedDatabase(firestore: Firestore): Promise<{
     {
       category: "Dance",
       name: "Areum Choi",
-      career: "Former backup dancer turned trainer, teaches sharp-line technique and camera-ready performance habits.",
+      career:
+        "Started as a backup dancer touring with multiple idol acts, then pivoted to teaching — she's the trainer people come back to for sharp lines, clean transitions, and camera-ready habits that hold up on a broadcast stage.",
       rating: 4.6,
       review: 1,
       student: 27,
@@ -124,7 +128,8 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       totalSessions: 8,
       price: 12000,
       image: labelThumbnail("Vocal · Beginner", BRAND.popmint),
-      description: "An 8-session beginner-friendly vocal course covering breath support, pitch, and tone.",
+      description:
+        "Start from wherever you are — breath support, pitch accuracy, and tone control, taught the way a debut trainee actually learns them. No prior vocal training needed.",
     },
     {
       title: "Vocal Runs & Ad-libs Intensive",
@@ -135,7 +140,8 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       totalSessions: 10,
       price: 15000,
       image: labelThumbnail("Vocal · Intermediate", BRAND.popmint),
-      description: "10 sessions building agile vocal runs, ad-libs, and stylistic phrasing for K-pop vocal lines.",
+      description:
+        "Turn stiff runs into agile ones. Built around the ad-libs and stylistic phrasing that separate a good K-pop vocal line from a forgettable one.",
     },
     {
       title: "Pre-Debut Vocal Coaching",
@@ -146,7 +152,8 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       totalSessions: 12,
       price: 19000,
       image: labelThumbnail("Vocal · Advanced", BRAND.popmint),
-      description: "Advanced 1:1 coaching for trainees preparing for agency evaluations and debut showcases.",
+      description:
+        "For trainees with an agency evaluation or debut showcase on the calendar. Twelve sessions of the exact scrutiny a live panel gives you, minus the nerves.",
     },
     {
       title: "K-Pop Dance Fundamentals",
@@ -157,7 +164,8 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       totalSessions: 8,
       price: 12000,
       image: labelThumbnail("Dance · Beginner", BRAND.popmag),
-      description: "An 8-session beginner-friendly K-pop dance course covering basic isolations and choreography.",
+      description:
+        "Isolations, counts, and your first full choreography — the fundamentals every K-pop dance line is built on, taught 1:1 so nothing gets rushed.",
     },
     {
       title: "Point Choreography Workshop",
@@ -168,7 +176,8 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       totalSessions: 6,
       price: 9000,
       image: labelThumbnail("Dance · Intermediate", BRAND.popmag),
-      description: "Small-group sessions drilling the signature 'point choreography' moves from popular title tracks.",
+      description:
+        "Small-group sessions built around the 'point choreography' moves fans learn from fancams — the handful of gestures a whole title track gets remembered by.",
     },
     {
       title: "Stage-Ready Performance Lab",
@@ -179,7 +188,8 @@ export async function seedDatabase(firestore: Firestore): Promise<{
       totalSessions: 10,
       price: 18000,
       image: labelThumbnail("Dance · Advanced", BRAND.popmag),
-      description: "Advanced formation, facial expression, and camera-work training for stage and broadcast readiness.",
+      description:
+        "Formation changes, facial expression, camera angles — the details that separate a rehearsal-room routine from one that holds up under broadcast lighting.",
     },
   ] as const;
 
@@ -212,19 +222,19 @@ export async function seedDatabase(firestore: Firestore): Promise<{
   const eventSeeds = [
     {
       title: "Welcome discount",
-      description: "10% off your first booking.",
+      description: "New here? Your first booking is 10% off — on us, no code needed.",
       discountAmount: 10,
       thumbnail: labelThumbnail("Welcome", BRAND.popyellow, 600, 300),
     },
     {
       title: "Summer vocal camp",
-      description: "Book 3 vocal sessions, get 1 free.",
+      description: "Book any 3 vocal sessions this summer and the 4th is free — stackable across any vocal trainer.",
       discountAmount: 25,
       thumbnail: labelThumbnail("Summer Camp", BRAND.popmint, 600, 300),
     },
     {
       title: "Referral bonus",
-      description: "Refer a friend and both get 15% off.",
+      description: "Bring a friend into the studio — you both get 15% off your next course once they book their first lesson.",
       discountAmount: 15,
       thumbnail: labelThumbnail("Referral", BRAND.popblue, 600, 300),
     },
@@ -251,10 +261,36 @@ export async function seedDatabase(firestore: Firestore): Promise<{
   );
 
   const faqSeeds = [
-    { question: "Can I cancel a booked lesson?", answer: "Yes, up to 24 hours before the scheduled session." },
-    { question: "Do I need my own equipment?", answer: "Just a webcam and microphone — no special equipment required." },
-    { question: "Can I switch teachers mid-course?", answer: "Yes, contact support and we'll help you transfer your remaining sessions." },
-    { question: "Is there a free trial?", answer: "The demo account lets you explore every flow without booking a real paid session." },
+    {
+      question: "Can I cancel or reschedule a booked lesson?",
+      answer:
+        "Yes — cancel or move a session up to 24 hours before it starts, no fee. Inside 24 hours, reach out to your trainer directly and most are happy to work something out.",
+    },
+    {
+      question: "Do I need my own equipment?",
+      answer:
+        "Just a webcam and a microphone — most laptops already have both built in. Vocal trainees sometimes upgrade to a USB mic later, but it's never required to start.",
+    },
+    {
+      question: "Can I switch teachers partway through a course?",
+      answer:
+        "Yes. Message support and we'll transfer your remaining sessions to a new trainer in the same track — no penalty, and your progress carries over.",
+    },
+    {
+      question: "What's the difference between 1:1, 1:6, and VOD?",
+      answer:
+        "1:1 is a private live session with your trainer. 1:6 is a small live group class, capped at six so everyone still gets real feedback. VOD is self-paced — watch, practice, and complete lessons on your own schedule.",
+    },
+    {
+      question: "Do I get a certificate?",
+      answer:
+        "Every curriculum with a quiz issues a certificate once you've completed 100% of its lessons and passed each quiz — downloadable and printable from My Page.",
+    },
+    {
+      question: "Is there a free trial?",
+      answer:
+        "Click \"Try the demo\" on the home page — it drops you straight into a full account (bookings, lessons, progress, the works) with no signup and no payment info.",
+    },
   ];
   await Promise.all(
     faqSeeds.map((seed, index) =>
@@ -263,11 +299,36 @@ export async function seedDatabase(firestore: Firestore): Promise<{
   );
 
   const reviewSeeds = [
-    { teacher: "Jinho Kang", curriculum: "K-Pop Dance Fundamentals", rating: 5, comment: "Great first class, very encouraging teacher!" },
-    { teacher: "Jinho Kang", curriculum: "Stage-Ready Performance Lab", rating: 5, comment: "Pushed me hard but my stage presence improved so much." },
-    { teacher: "Jiwoo Han", curriculum: "K-Pop Vocal Fundamentals", rating: 5, comment: "Finally understand breath support — huge difference in 8 sessions." },
-    { teacher: "Minji Seo", curriculum: "Vocal Runs & Ad-libs Intensive", rating: 4, comment: "Challenging but rewarding, runs are much cleaner now." },
-    { teacher: "Areum Choi", curriculum: "Point Choreography Workshop", rating: 5, comment: "Loved the small group energy, learned two title-track routines." },
+    {
+      teacher: "Jinho Kang",
+      curriculum: "K-Pop Dance Fundamentals",
+      rating: 5,
+      comment: "Walked in with zero dance background. By lesson 4 I could actually follow an 8-count without stopping to think. Jinho notices the tiny stuff.",
+    },
+    {
+      teacher: "Jinho Kang",
+      curriculum: "Stage-Ready Performance Lab",
+      rating: 5,
+      comment: "This is where I stopped dancing like I was rehearsing and started dancing like I was being filmed. Worth it for the camera-angle feedback alone.",
+    },
+    {
+      teacher: "Jiwoo Han",
+      curriculum: "K-Pop Vocal Fundamentals",
+      rating: 5,
+      comment: "I'd been singing from my throat for years without knowing it. Eight sessions in, breath support finally clicked and my range opened up.",
+    },
+    {
+      teacher: "Minji Seo",
+      curriculum: "Vocal Runs & Ad-libs Intensive",
+      rating: 4,
+      comment: "Runs that used to sound muddy are actually clean now. Fair warning: Minji will make you repeat a 2-second phrase fifteen times if it's not right.",
+    },
+    {
+      teacher: "Areum Choi",
+      curriculum: "Point Choreography Workshop",
+      rating: 5,
+      comment: "Small-group energy made this — six of us pushing each other through the same eight counts until it clicked for everyone. Learned two full routines.",
+    },
   ];
   await Promise.all(
     reviewSeeds.map((seed) =>
