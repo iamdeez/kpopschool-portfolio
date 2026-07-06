@@ -2,8 +2,8 @@
 
 **Live demo**: https://kpopschool-portfolio-demo.netlify.app (frontend) /
 https://kpopschool-portfolio-server.fly.dev (API) — click "Try the demo" to
-sign in without creating an account. Real signup/signin and admin login
-aren't live yet (see Known gaps).
+sign in without creating an account, or sign up for a real account. Both
+flows, plus admin login, are verified working against this live deployment.
 
 A from-scratch, modern-stack rewrite of a K-pop dance/vocal lesson booking
 platform — teachers, curriculums, bookings, payments, live classes, video
@@ -133,13 +133,12 @@ period of no traffic.
   outweighed it. See `docs/specs/v1.0.0/CHANGES.md` for the full breakdown.
   This is now believed to be the final, honest number for this stack —
   further gains would need bypassing Firebase Auth's own init behavior.
-- Real signup/signin (`/signup`, `/signin`) and admin login don't work on
-  the live deployment yet — Firebase Console's Authentication > Sign-in
-  method > Email/Password is still disabled there (a manual step, pending).
-  The demo login button (custom-token flow) is unaffected and was verified
-  end-to-end against the real deployment (demo login → real Firebase ID
-  token → authenticated API calls → purchase → progress tracking, all via
-  curl against the live URLs above).
+- Real signup/signin (`/signup`, `/signin`), the demo login button, and
+  admin login were all verified end-to-end against the live deployment via
+  curl (register/sign-in through the real Firebase Auth REST API → real ID
+  token → authenticated backend calls, including a purchase, progress
+  tracking, and an admin-only reports call). The temporary test account
+  created for this check was deleted afterward.
 - Fly.io's `auto_stop_machines` means the very first request after a period
   of no traffic pays a cold-start delay (machine boot time) — a deliberate
   trade-off for staying on the free tier on a low-traffic portfolio demo.
