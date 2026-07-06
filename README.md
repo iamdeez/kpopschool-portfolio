@@ -1,14 +1,41 @@
-# kpopschool — portfolio demo
-
-**Live demo**: https://kpopschool-portfolio-demo.netlify.app (frontend) /
-https://kpopschool-portfolio-server.fly.dev (API) — click "Try the demo" to
-sign in without creating an account, or sign up for a real account. Both
-flows, plus admin login, are verified working against this live deployment.
+# K-POP School — portfolio demo
 
 A from-scratch, modern-stack rewrite of a K-pop dance/vocal lesson booking
-platform — teachers, curriculums, bookings, payments, live classes, video
-lessons with quizzes and certificates, per-lesson discussion, an admin
-dashboard with a reporting tab, built as a safe-to-demo portfolio piece.
+platform: teachers, curriculums, bookings, payments, live classes, video
+lessons with quizzes and certificates, per-lesson discussion, and an admin
+dashboard with a reporting tab — built as a safe-to-demo portfolio piece.
+
+[![CI](https://github.com/iamdeez/kpopschool-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/iamdeez/kpopschool-portfolio/actions/workflows/ci.yml)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React_18-61DAFB?logo=react&logoColor=white)
+![NestJS](https://img.shields.io/badge/NestJS-E0234E?logo=nestjs&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?logo=firebase&logoColor=black)
+![Fly.io](https://img.shields.io/badge/Fly.io-8B5CF6?logo=flydotio&logoColor=white)
+![Netlify](https://img.shields.io/badge/Netlify-00C7B7?logo=netlify&logoColor=white)
+
+**🔗 Live demo:** **https://kpopschool-portfolio-demo.netlify.app**
+— click **"Try the demo"** to sign in with zero setup, or sign up for a
+real account. Demo login, real signup/signin, and admin login are all
+verified end-to-end against this exact deployment (not just localhost).
+
+<p>
+  <img src="docs-assets/screenshot-home.webp" alt="Home page" width="100%">
+</p>
+<p float="left">
+  <img src="docs-assets/screenshot-teachers.webp" alt="Teachers page" width="49%">
+  <img src="docs-assets/screenshot-curriculum.webp" alt="Curriculum page" width="49%">
+</p>
+
+## Table of contents
+
+- [Why a rewrite, not a refactor](#why-a-rewrite-not-a-refactor)
+- [Architecture](#architecture)
+- [Getting started](#getting-started)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Known gaps](#known-gaps-disclosed-rather-than-hidden)
+
 Full spec/plan/tasks live one level up (this repo is a sibling of the
 original `kpop_server`/`kpopschool`, under a shared `docs/`):
 
@@ -104,6 +131,14 @@ E2E_ADMIN_EMAIL=you@example.com E2E_ADMIN_PASSWORD=yourpassword \
   pnpm --filter web run test:e2e
 ```
 
+| Check | Coverage |
+|---|---|
+| `pnpm run typecheck` | `tsc --noEmit` across all 3 packages |
+| `pnpm --filter server run test` | 35 Jest specs (services, guards, mock gateways) |
+| `pnpm --filter web run test` | Vitest (route guards) |
+| `pnpm --filter web run test:e2e` | 13 Playwright specs — real emulator, real backend, real frontend |
+| CI (`.github/workflows/ci.yml`) | Both of the above, on every push, against a real Firebase emulator |
+
 ## Deployment
 
 `apps/server/Dockerfile` builds a production image; deployed to **Fly.io**
@@ -118,45 +153,82 @@ fully stop when idle, restart on the next request) to stay within the free
 tier — the trade-off is a cold-start delay on the first request after a
 period of no traffic.
 
-**Known gaps, disclosed rather than hidden:**
-- Lighthouse (mobile), **measured against the real live deployment above**:
-  Accessibility stays effectively perfect (Home 99, Teachers 100,
-  Curriculum 100 — same as the local-build measurement). **Performance
-  moved in both directions**: Home 78 → **82** (improved), but Teachers
-  85 → 79 and Curriculum 93 → 79 (both **regressed**, Curriculum losing its
-  90+ pass). Root cause (confirmed via Lighthouse's network-requests audit):
-  a real Firebase project makes a `www.googleapis.com/identitytoolkit/.../getProjectConfig`
-  call on Auth init that the Local Emulator Suite never makes at all — so
-  every prior "local build" measurement in this file was quietly optimistic.
-  Teachers/Curriculum had few other third-party requests, so this new call
-  is a large relative hit; Home already had many, so the CDN's benefit
-  outweighed it. See `docs/specs/v1.0.0/CHANGES.md` for the full breakdown.
-  This is now believed to be the final, honest number for this stack —
-  further gains would need bypassing Firebase Auth's own init behavior.
-- Real signup/signin (`/signup`, `/signin`), the demo login button, and
-  admin login were all verified end-to-end against the live deployment via
-  curl (register/sign-in through the real Firebase Auth REST API → real ID
-  token → authenticated backend calls, including a purchase, progress
-  tracking, and an admin-only reports call). The temporary test account
-  created for this check was deleted afterward.
-- Fly.io's `auto_stop_machines` means the very first request after a period
-  of no traffic pays a cold-start delay (machine boot time) — a deliberate
-  trade-off for staying on the free tier on a low-traffic portfolio demo.
-- Zoom domain verification (`apps/web/public/Zoomverify/verifyzoom.html`) is
-  a placeholder until a real Zoom app + deployed domain exist.
-- The Playwright E2E suite (`apps/web/e2e/`) passes 13/13 both locally and in
-  CI (`.github/workflows/ci.yml`'s `e2e` job, verified against the actual
-  GitHub Actions run at https://github.com/iamdeez/kpopschool-portfolio) —
-  see `docs/specs/v1.0.0/CHANGES.md`, `docs/specs/v1.1.0/CHANGES.md`,
-  `docs/specs/v1.2.0/CHANGES.md`, and `docs/specs/v1.2.1/CHANGES.md` for real
-  bugs (not just typos) that only surfaced under actual execution — a
-  `class-transformer`/Firestore serialization conflict, an admin "list all
-  payments" query that had silently returned an empty array since v1.0.0, and
-  four CI-only failures (pnpm/action-setup version conflict, a JDK version
-  too old for firebase-tools, a missing shared-types build step, and a
-  Vite dev-server IPv4/IPv6 binding mismatch, and — found deploying to
-  Fly.io — a NestJS server binding IPv6-only by default, unreachable by
-  Fly.io's IPv4 health-checking proxy). The automated suite itself still
-  only runs against the emulator; the core customer flow (demo login → buy
-  → progress) was separately verified against the real deployment above via
-  direct API calls, not the Playwright suite.
+## Known gaps, disclosed rather than hidden
+
+<details>
+<summary><b>Lighthouse (mobile), measured against the real live deployment</b> — Accessibility 99–100, Performance 79–82</summary>
+
+<br>
+
+Accessibility stays effectively perfect (Home 99, Teachers 100,
+Curriculum 100 — same as the local-build measurement). **Performance
+moved in both directions**: Home 78 → **82** (improved), but Teachers
+85 → 79 and Curriculum 93 → 79 (both **regressed**, Curriculum losing its
+90+ pass). Root cause (confirmed via Lighthouse's network-requests audit):
+a real Firebase project makes a `www.googleapis.com/identitytoolkit/.../getProjectConfig`
+call on Auth init that the Local Emulator Suite never makes at all — so
+every prior "local build" measurement was quietly optimistic. Teachers/
+Curriculum had few other third-party requests, so this new call is a large
+relative hit; Home already had many, so the CDN's benefit outweighed it.
+See `docs/specs/v1.0.0/CHANGES.md` for the full breakdown. This is now
+believed to be the final, honest number for this stack — further gains
+would need bypassing Firebase Auth's own init behavior.
+
+</details>
+
+<details>
+<summary><b>Auth flows</b> — demo login, real signup/signin, and admin login all verified against the live deployment</summary>
+
+<br>
+
+Verified end-to-end via curl against the real Firebase Auth REST API: real
+registration → sign-in → real ID token → authenticated backend calls
+(a purchase, progress tracking, and an admin-only reports call). The
+temporary test account created for this check was deleted afterward.
+
+</details>
+
+<details>
+<summary><b>Fly.io cold start</b> — first request after idle pays a boot-time delay</summary>
+
+<br>
+
+`auto_stop_machines` is on to stay within the free tier (machines fully
+stop when idle, restart on the next request) — a deliberate trade-off for
+a low-traffic portfolio demo over paying for an always-on machine.
+
+</details>
+
+<details>
+<summary><b>Zoom domain verification</b> — placeholder until a real Zoom app exists</summary>
+
+<br>
+
+`apps/web/public/Zoomverify/verifyzoom.html` is a placeholder until a real
+Zoom app + deployed domain exist.
+
+</details>
+
+<details>
+<summary><b>E2E suite</b> — 13/13 locally and in CI; real bugs found along the way, not just typos</summary>
+
+<br>
+
+The Playwright E2E suite (`apps/web/e2e/`) passes 13/13 both locally and in
+CI (`.github/workflows/ci.yml`'s `e2e` job, verified against the actual
+GitHub Actions run at https://github.com/iamdeez/kpopschool-portfolio) —
+see `docs/specs/v1.0.0/CHANGES.md`, `docs/specs/v1.1.0/CHANGES.md`,
+`docs/specs/v1.2.0/CHANGES.md`, and `docs/specs/v1.2.1/CHANGES.md` for real
+bugs (not just typos) that only surfaced under actual execution — a
+`class-transformer`/Firestore serialization conflict, an admin "list all
+payments" query that had silently returned an empty array since v1.0.0, and
+four CI-only failures (pnpm/action-setup version conflict, a JDK version
+too old for firebase-tools, a missing shared-types build step, and a
+Vite dev-server IPv4/IPv6 binding mismatch, and — found deploying to
+Fly.io — a NestJS server binding IPv6-only by default, unreachable by
+Fly.io's IPv4 health-checking proxy). The automated suite itself still
+only runs against the emulator; the core customer flow (demo login → buy
+→ progress) was separately verified against the real deployment above via
+direct API calls, not the Playwright suite.
+
+</details>
